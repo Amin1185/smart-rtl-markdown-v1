@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Markdown Previewer</title>
+    <meta name="description" content="Smart RTL-aware Markdown previewer with MathJax, Prism, and Tailwind-like styles.">
+    <!-- Repository: smart-rtl-markdown — Version 1.0.0 -->
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <!-- MathJax for LaTeX -->
+    <script>
+        marked.use({
+            breaks: true,
+            gfm: true
+        });
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    window.mathJaxReady = true;
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --card-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        /* Header gradient animation */
+        .header-gradient {
+            background: var(--primary-gradient);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Glass morphism effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: var(--card-shadow-lg);
+            border-radius: var(--border-radius);
+        }
+
+        /* Editor styling */
+        .editor-textarea {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            resize: none;
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .editor-textarea::placeholder {
+            color: #6c7086;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Preview container with overflow handling */
+        .preview-container {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        /* Markdown output styling */
+        .markdown-body {
+            font-family: 'Vazirmatn', 'Inter', sans-serif;
+            line-height: 1.9;
+            color: #1e293b;
+        }
+
+        /* Per-block direction styles */
+        .markdown-body [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .markdown-body [dir="ltr"] {
+            direction: ltr;
+            text-align: left;
+        }
+
+        /* RTL list adjustments */
+        .markdown-body ul[dir="rtl"], 
+        .markdown-body ol[dir="rtl"] {
+            padding-left: 0;
+            padding-right: 1.75em;
+        }
+
+        .markdown-body ul[dir="ltr"], 
+        .markdown-body ol[dir="ltr"] {
+            padding-left: 1.75em;
+            padding-right: 0;
+        }
+
+        .markdown-body ul[dir="rtl"] li::before {
+            margin-left: 0;
+            margin-right: -1.25em;
+        }
+
+        .markdown-body ul[dir="ltr"] li::before {
+            margin-left: -1.25em;
+            margin-right: 0;
+        }
+
+        /* Blockquote RTL/LTR adjustments */
+        .markdown-body blockquote[dir="rtl"] {
+            border-radius: 12px 0 0 12px;
+        }
+
+        .markdown-body blockquote[dir="rtl"]::before {
+            left: auto;
+            right: 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .markdown-body blockquote[dir="ltr"] {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .markdown-body blockquote[dir="ltr"]::before {
+            left: 0;
+            right: auto;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .markdown-body h1 {
+            font-size: 2.25em;
+            font-weight: 700;
+            margin: 0 0 0.75em 0;
+            padding-bottom: 0.4em;
+            border-bottom: 3px solid #e2e8f0;
+            background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.75em;
+            font-weight: 600;
+            margin: 1.5em 0 0.5em 0;
+            color: #334155;
+            display: flex;
+            align-items: stretch;
+            gap: 0.5em;
+        }
+
+        .markdown-body h2::before {
+            content: '';
+            width: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.35em;
+            font-weight: 600;
+            margin: 1.25em 0 0.4em 0;
+            color: #475569;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1.25em;
+            color: #475569;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .markdown-body strong {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .markdown-body em {
+            font-style: italic;
+            color: #6366f1;
+        }
+
+        .markdown-body ul, .markdown-body ol {
+            margin-bottom: 1.25em;
+            padding-left: 1.75em;
+        }
+
+        .markdown-body ul {
+            list-style-type: none;
+        }
+
+        .markdown-body ul li::before {
+            content: '▸';
+            color: #8b5cf6;
+            font-weight: bold;
+            display: inline-block;
+            width: 1.25em;
+            margin-left: -1.25em;
+        }
+
+        .markdown-body ul[dir="rtl"] li::before {
+            content: '◂';
+        }
+
+        .markdown-body ol {
+            list-style-type: decimal;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.5em;
+            color: #475569;
+        }
+
+        .markdown-body a {
+            color: #6366f1;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .markdown-body a:hover {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+
+        .markdown-body code:not([class*="language-"]) {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 0.25em 0.5em;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875em;
+            color: #7c3aed;
+            border: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        /* Code blocks with horizontal scroll */
+        .markdown-body pre {
+            margin: 1.5em 0;
+            border-radius: 12px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            direction: ltr !important;
+            text-align: left !important;
+            max-width: 100%;
+        }
+
+        .markdown-body pre code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            display: block;
+            min-width: max-content;
+        }
+
+        .markdown-body blockquote {
+            margin: 1.5em 0;
+            padding: 1em 1.5em;
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            border-radius: 0 12px 12px 0;
+            position: relative;
+            color: #6b21a8;
+            font-style: italic;
+            overflow-x: auto;
+        }
+
+        .markdown-body blockquote::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .markdown-body hr {
+            border: none;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 2em 0;
+        }
+
+        /* Tables with horizontal scroll wrapper */
+        .markdown-body .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5em 0;
+            border-radius: 12px;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            min-width: 400px;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .markdown-body th, .markdown-body td {
+            padding: 0.75em 1em;
+            border: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .markdown-body th {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .markdown-body td {
+            background: white;
+        }
+
+        /* MathJax styling with overflow */
+        .markdown-body .MathJax {
+            font-size: 1.1em;
+        }
+                /* Fix inline math alignment */
+        mjx-container:not([display="true"]) {
+            vertical-align: -0.40em !important;
+            margin: 0 2px !important;
+        }
+        
+        .markdown-body mjx-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.25em 0;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        .markdown-body mjx-container[display="true"] {
+            display: block !important;
+            margin: 1.5em 0;
+            padding: 1em;
+            background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+            border-radius: 12px;
+            border: 1px solid #fde047;
+            text-align: center !important;
+            direction: ltr !important;
+            overflow-x: auto;
+        }
+
+        /* Long text/URL handling */
+        .markdown-body .overflow-scroll-container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+            border-radius: 5px;
+            border: 2px solid #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        }
+
+        /* Scrollbar for dark elements */
+        .editor-textarea::-webkit-scrollbar-track,
+        pre::-webkit-scrollbar-track {
+            background: #313244;
+        }
+
+        .editor-textarea::-webkit-scrollbar-thumb,
+        pre::-webkit-scrollbar-thumb {
+            background: #585b70;
+            border: 2px solid #313244;
+        }
+
+        /* Window controls */
+        .window-controls {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #1e1e2e;
+            border-bottom: 1px solid #313244;
+        }
+
+        .window-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .window-dot:hover {
+            transform: scale(1.2);
+        }
+
+        .window-dot.red { background: #f38ba8; }
+        .window-dot.yellow { background: #f9e2af; }
+        .window-dot.green { background: #a6e3a1; }
+
+        /* Direction indicator */
+        .direction-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .direction-badge.mixed {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #4338ca;
+        }
+
+        .direction-badge.rtl {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+
+        .direction-badge.ltr {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Pulse animation for live indicator */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .live-indicator {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Direction stats */
+        .direction-stats {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .direction-stats span {
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+        }
+
+        .direction-stats .rtl-count {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .direction-stats .ltr-count {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="header-gradient text-white py-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex items-center justify-center gap-4">
+                <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                </div>
+                <div class="text-center">
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Advanced Markdown Previewer</h1>
+                    <p class="text-indigo-100 mt-2 text-lg">Real-time preview with MathJax, Syntax Highlighting & Smart Per-Block RTL</p>
+                </div>
+            </div>
+            
+            <!-- Feature badges -->
+            <div class="flex flex-wrap justify-center gap-3 mt-6">
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">📝 Markdown</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🔢 MathJax</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🎨 Syntax Highlight</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🔄 Per-Block RTL/LTR</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-10">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <!-- Editor Panel -->
+            <div class="flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                        <h2 class="text-lg font-semibold text-slate-700">Markdown Editor</h2>
+                    </div>
+                    <div class="stats-bar" id="stats">
+                        <span class="stat-item">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span id="word-count">0 words</span>
+                        </span>
+                        <span class="stat-item">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            <span id="char-count">0 chars</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="glass-card overflow-hidden flex-1 flex flex-col">
+                    <div class="window-controls">
+                        <div class="window-dot red"></div>
+                        <div class="window-dot yellow"></div>
+                        <div class="window-dot green"></div>
+                        <span class="text-slate-400 text-sm ml-4 font-mono">document.md</span>
+                        <div class="ml-auto flex items-center gap-2">
+                            <span class="live-indicator flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
+                                <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                                LIVE
+                            </span>
+                        </div>
+                    </div>
+                    <textarea 
+                        id="markdown-input" 
+                        class="editor-textarea w-full flex-1 p-5 min-h-[600px]"
+                        placeholder="Start typing your Markdown here...
+
+# Supports
+- **Bold** and *italic* text
+- Math: $E = mc^2$ or $$\int_0^\infty f(x)dx$$
+- Code blocks with syntax highlighting
+- Per-block RTL/LTR detection"
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+                        <h2 class="text-lg font-semibold text-slate-700">Live Preview</h2>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="direction-stats" id="direction-stats">
+                            <span class="rtl-count">RTL: 0</span>
+                            <span class="ltr-count">LTR: 0</span>
+                        </div>
+                        <div id="direction-indicator">
+                            <span class="direction-badge ltr">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                                PER-BLOCK
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card overflow-hidden flex-1 flex flex-col">
+                    <div class="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-rose-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+                        </div>
+                        <span class="text-slate-500 text-sm ml-2 font-mono">preview.html</span>
+                    </div>
+                    <div 
+                        id="markdown-output" 
+                        class="markdown-body preview-container p-8 min-h-[600px] flex-1"
+                    >
+                        <p class="text-slate-400 text-center italic">Your preview will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Reference Cards -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Markdown Reference -->
+            <div class="glass-card p-6">
+                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                    <span class="p-2 bg-indigo-100 rounded-lg">📝</span>
+                    Markdown Syntax
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-indigo-600 font-mono"># Heading</code>
+                        <span class="text-slate-500">Header</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-indigo-600 font-mono">**bold**</code>
+                        <span class="text-slate-500">Bold text</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-indigo-600 font-mono">*italic*</code>
+                        <span class="text-slate-500">Italic text</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-indigo-600 font-mono">`code`</code>
+                        <span class="text-slate-500">Inline code</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Math Reference -->
+            <div class="glass-card p-6">
+                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                    <span class="p-2 bg-purple-100 rounded-lg">🔢</span>
+                    Math (LaTeX)
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-purple-600 font-mono">$E=mc^2$</code>
+                        <span class="text-slate-500">Inline</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-purple-600 font-mono">$$\sum_{i=1}^n$$</code>
+                        <span class="text-slate-500">Block</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-purple-600 font-mono">$\frac{a}{b}$</code>
+                        <span class="text-slate-500">Fraction</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                        <code class="text-purple-600 font-mono">$\sqrt{x}$</code>
+                        <span class="text-slate-500">Square root</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Reference -->
+            <div class="glass-card p-6">
+                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                    <span class="p-2 bg-emerald-100 rounded-lg">💻</span>
+                    Code Blocks
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="p-2 bg-slate-50 rounded-lg">
+                        <code class="text-emerald-600 font-mono block">```javascript</code>
+                        <code class="text-slate-500 font-mono block pl-2">// your code</code>
+                        <code class="text-emerald-600 font-mono block">```</code>
+                    </div>
+                    <p class="text-slate-500 text-xs mt-2">
+                        Supports: JavaScript, Python, TypeScript, CSS, HTML, JSON, Bash, and many more...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-slate-500 text-sm border-t border-slate-200 bg-white/50">
+        <p>Built with ❤️ using Marked.js, MathJax, and Prism.js</p>
+    </footer>
+
+    <script>
+/*
+        // Configure marked.js
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: true,
+            mangle: false,
+            highlight: function(code, lang) {
+                if (lang && Prism.languages[lang]) {
+                    try {
+                        return Prism.highlight(code, Prism.languages[lang], lang);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+                return code;
+            }
+        });
+
+        // Custom renderer to add language class for Prism and wrap tables
+        const renderer = new marked.Renderer();
+        renderer.code = function(code, language) {
+            const validLang = language && Prism.languages[language] ? language : 'plaintext';
+            const highlighted = language && Prism.languages[language] 
+                ? Prism.highlight(code, Prism.languages[language], language)
+                : code;
+            return `<pre class="language-${validLang}"><code class="language-${validLang}">${highlighted}</code></pre>`;
+        };
+        
+        // Wrap tables in scrollable container
+        renderer.table = function(header, body) {
+            return `<div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+        };
+        
+        marked.setOptions({ renderer });
+*/
+        // DOM elements
+        const markdownInput = document.getElementById('markdown-input');
+        const markdownOutput = document.getElementById('markdown-output');
+        const directionIndicator = document.getElementById('direction-indicator');
+        const directionStats = document.getElementById('direction-stats');
+        const wordCountEl = document.getElementById('word-count');
+        const charCountEl = document.getElementById('char-count');
+
+        // Persian/Arabic Unicode ranges
+        const PERSIAN_ARABIC_PATTERN = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g;
+        // Latin characters pattern (including extended Latin)
+        const LATIN_PATTERN = /[A-Za-z\u00C0-\u024F]/g;
+
+        // Count Persian vs Latin characters in text
+        function countCharacterTypes(text) {
+            // Remove code, math, and special characters for accurate counting
+            const cleanText = text
+                .replace(/<[^>]*>/g, '') // Remove HTML tags
+                .replace(/\$\$[\s\S]*?\$\$/g, '') // Remove block math
+                .replace(/\$[^$]+\$/g, '') // Remove inline math
+                .replace(/`[^`]+`/g, '') // Remove inline code
+                .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+                .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
+                .replace(/[0-9\s\p{P}\p{S}]/gu, ''); // Remove numbers, spaces, punctuation, symbols
+            
+            const persianMatches = cleanText.match(PERSIAN_ARABIC_PATTERN) || [];
+            const latinMatches = cleanText.match(LATIN_PATTERN) || [];
+            
+            return {
+                persian: persianMatches.length,
+                latin: latinMatches.length
+            };
+        }
+
+        // Determine direction based on majority character type
+        function getElementDirection(text) {
+            const counts = countCharacterTypes(text);
+            
+            // If no significant characters, default to LTR
+            if (counts.persian === 0 && counts.latin === 0) {
+                return 'ltr';
+            }
+            
+            // Majority-based decision
+            return counts.persian > counts.latin ? 'rtl' : 'ltr';
+        }
+
+        // Apply direction to each block element
+        function applyPerBlockDirection(container) {
+            let rtlCount = 0;
+            let ltrCount = 0;
+            
+            // Elements to process for direction
+            const blockSelectors = [
+                'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'li', 'blockquote', 'th', 'td'
+            ];
+            
+            // Process lists separately for proper direction
+            const lists = container.querySelectorAll('ul, ol');
+            lists.forEach(list => {
+                // Analyze all text content of the list
+                const listText = list.textContent || '';
+                const direction = getElementDirection(listText);
+                list.setAttribute('dir', direction);
+                if (direction === 'rtl') rtlCount++; else ltrCount++;
+            });
+            
+            // Process each block element
+            blockSelectors.forEach(selector => {
+                const elements = container.querySelectorAll(selector);
+                elements.forEach(el => {
+                    // Skip if it's inside a pre/code block
+                    if (el.closest('pre') || el.closest('code')) {
+                        return;
+                    }
+                    
+                    const text = el.textContent || '';
+                    const direction = getElementDirection(text);
+                    
+                    el.setAttribute('dir', direction);
+                    
+                    if (direction === 'rtl') {
+                        rtlCount++;
+                    } else {
+                        ltrCount++;
+                    }
+                });
+            });
+            
+            return { rtlCount, ltrCount };
+        }
+
+        // Update direction indicator UI
+        function updateDirectionIndicator(rtlCount, ltrCount) {
+            const total = rtlCount + ltrCount;
+            let badgeClass, label, iconPath;
+            
+            if (total === 0) {
+                badgeClass = 'ltr';
+                label = 'LTR';
+                iconPath = 'M14 5l7 7m0 0l-7 7m7-7H3';
+            } else if (rtlCount > 0 && ltrCount > 0) {
+                badgeClass = 'mixed';
+                label = 'MIXED';
+                iconPath = 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4';
+            } else if (rtlCount > ltrCount) {
+                badgeClass = 'rtl';
+                label = 'RTL';
+                iconPath = 'M10 19l-7-7m0 0l7-7m-7 7h18';
+            } else {
+                badgeClass = 'ltr';
+                label = 'LTR';
+                iconPath = 'M14 5l7 7m0 0l-7 7m7-7H3';
+            }
+            
+            directionIndicator.innerHTML = `
+                <span class="direction-badge ${badgeClass}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"></path>
+                    </svg>
+                    ${label}
+                </span>
+            `;
+            
+            directionStats.innerHTML = `
+                <span class="rtl-count">RTL: ${rtlCount}</span>
+                <span class="ltr-count">LTR: ${ltrCount}</span>
+            `;
+        }
+
+        // Update word and character count
+        function updateStats(text) {
+            const chars = text.length;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            wordCountEl.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+            charCountEl.textContent = `${chars} char${chars !== 1 ? 's' : ''}`;
+        }
+
+        // Escape math expressions before markdown parsing
+        function escapeMath(text) {
+            const mathBlocks = [];
+            const inlineMaths = [];
+            
+            // Escape block math $$...$$
+            text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+                mathBlocks.push(match);
+                return `%%MATHBLOCK${mathBlocks.length - 1}%%`;
+            });
+            
+            // Escape inline math $...$
+            text = text.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+                inlineMaths.push(match);
+                return `%%MATHINLINE${inlineMaths.length - 1}%%`;
+            });
+            
+            return { text, mathBlocks, inlineMaths };
+        }
+
+        // Restore math expressions after markdown parsing
+        function restoreMath(html, mathBlocks, inlineMaths) {
+            // Restore block math
+            mathBlocks.forEach((math, i) => {
+                html = html.replace(`%%MATHBLOCK${i}%%`, math);
+            });
+            
+            // Restore inline math
+            inlineMaths.forEach((math, i) => {
+                html = html.replace(`%%MATHINLINE${i}%%`, math);
+            });
+            
+            return html;
+        }
+
+        // Main update function
+        function updatePreview() {
+            const rawMarkdown = markdownInput.value;
+            
+            // Update stats
+            updateStats(rawMarkdown);
+            
+            if (rawMarkdown.trim() === '') {
+                markdownOutput.innerHTML = '<p class="text-slate-400 text-center italic">Your preview will appear here...</p>';
+                updateDirectionIndicator(0, 0);
+                return;
+            }
+            
+            // Escape math before parsing markdown
+            const { text, mathBlocks, inlineMaths } = escapeMath(rawMarkdown);
+            
+            // Parse markdown
+            let html = marked.parse(text);
+            
+            // Restore math expressions
+            html = restoreMath(html, mathBlocks, inlineMaths);
+            
+            // Update output
+            markdownOutput.innerHTML = html;
+            
+            // Apply per-block direction detection
+            const directionCounts = applyPerBlockDirection(markdownOutput);
+            updateDirectionIndicator(directionCounts.rtlCount, directionCounts.ltrCount);
+            
+            // Re-highlight any code blocks that might have been missed
+            Prism.highlightAllUnder(markdownOutput);
+            
+            // Re-render MathJax
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetClear([markdownOutput]);
+                MathJax.typesetPromise([markdownOutput]).catch((err) => {
+                    console.error('MathJax error:', err);
+                });
+            }
+        }
+
+        // Debounce function for performance
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Event listeners
+        const debouncedUpdate = debounce(updatePreview, 150);
+        markdownInput.addEventListener('input', debouncedUpdate);
+        markdownInput.addEventListener('paste', () => setTimeout(updatePreview, 0));
+
+        // Sample content showcasing all features including per-block direction
+        const sampleMarkdown = `# Welcome to Advanced Markdown Previewer! 🚀
+
+This powerful editor supports **Markdown**, *LaTeX math*, and syntax highlighting with **smart per-block RTL detection**.
+
+## Math Examples
+
+Inline math: The famous equation $E = mc^2$ changed physics forever.
+
+Block math for complex formulas:
+
+$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
+
+The quadratic formula: $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
+
+## این یک عنوان فارسی است
+
+این یک پاراگراف به زبان فارسی است. این متن باید به صورت راست به چپ نمایش داده شود.
+
+### ریاضیات به فارسی
+
+معادله معروف انیشتین $E = mc^2$ فیزیک را متحول کرد.
+
+## Code with Syntax Highlighting
+
+\`\`\`javascript
+// Fibonacci sequence generator
+function* fibonacci() {
+    let [a, b] = [0, 1];
+    while (true) {
+        yield a;
+        [a, b] = [b, a + b];
+    }
+}
+
+const fib = fibonacci();
+console.log([...Array(10)].map(() => fib.next().value));
+\`\`\`
+
+\`\`\`python
+# List comprehension example
+squares = [x**2 for x in range(10) if x % 2 == 0]
+print(f"Even squares: {squares}")
+\`\`\`
+
+## Per-Block Smart Direction
+
+This paragraph is in English, so it renders left-to-right.
+
+این پاراگراف فارسی است و راست به چپ نمایش داده می‌شود.
+
+Even this paragraph که شامل کلمات فارسی و English است will detect the majority and choose the right direction!
+
+## Features
+
+- **Real-time preview** with instant updates
+- **MathJax** for beautiful mathematical typesetting
+- **Prism.js** for 200+ programming languages
+- **Smart per-block RTL/LTR** based on majority character analysis
+
+## ویژگی‌ها
+
+- پیش‌نمایش **زنده** با بروزرسانی فوری
+- **MathJax** برای نمایش زیبای فرمول‌های ریاضی
+- **Prism.js** برای بیش از ۲۰۰ زبان برنامه‌نویسی
+- تشخیص **هوشمند RTL/LTR** برای هر بلوک
+
+> 💡 **Pro Tip:** Each block is analyzed independently for direction!
+
+> 💡 **نکته:** هر بلوک به صورت مستقل برای جهت متن تحلیل می‌شود!
+
+---
+
+### Links & Formatting
+
+Check out [GitHub](https://github.com) for more tools.
+
+### Wide Math Formula (scroll to see all):
+
+$$\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6} \\quad \\text{and} \\quad \\prod_{p \\text{ prime}} \\frac{1}{1-p^{-s}} = \\sum_{n=1}^{\\infty} \\frac{1}{n^s} = \\zeta(s)$$
+
+| Feature | Status | توضیحات |
+|---------|--------|---------|
+| Markdown | ✅ Ready | آماده |
+| MathJax | ✅ Ready | آماده |
+| Syntax Highlight | ✅ Ready | آماده |
+| Per-Block RTL | ✅ Ready | آماده |
+
+**Happy writing!** ✨ **نوشتن خوش!**`;
+
+        // Initialize with sample content
+        markdownInput.value = sampleMarkdown;
+        
+        // Initial render after MathJax loads
+        if (document.readyState === 'complete') {
+            setTimeout(updatePreview, 500);
+        } else {
+            window.addEventListener('load', () => setTimeout(updatePreview, 500));
+        }
+    </script>
+</body>
+</html>
