@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     
-    <!-- MathJax for LaTeX -->
+    <!-- MathJax for LaTeX with Persian/Arabic support -->
     <script>
         window.MathJax = {
             tex: {
@@ -28,6 +28,14 @@
             },
             options: {
                 skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            },
+            chtml: {
+                mtextInheritFont: true,
+                scale: 1
+            },
+            svg: {
+                mtextInheritFont: true,
+                scale: 1
             },
             startup: {
                 ready: () => {
@@ -323,7 +331,7 @@
             max-width: none !important;
         }
 
-        /* Block/display math styling with potential scrollbar for wide formulas */
+        /* Block/display math styling */
         mjx-container[display="true"] {
             display: block !important;
             margin: 1em auto !important;
@@ -336,6 +344,11 @@
             overflow-x: auto;
             overflow-y: hidden;
             max-width: 100%;
+        }
+
+        /* Fix for Persian/Arabic text in MathJax */
+        mjx-mtext {
+            font-family: 'Vazirmatn', 'Inter', sans-serif !important;
         }
 
         /* Footnotes styling */
@@ -690,8 +703,8 @@
                         <span class="text-slate-500">Colors</span>
                     </div>
                     <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-purple-600 font-mono">$\sqrt{x}$</code>
-                        <span class="text-slate-500">Square root</span>
+                        <code class="text-purple-600 font-mono">\text{فارسی}</code>
+                        <span class="text-slate-500">Persian</span>
                     </div>
                 </div>
             </div>
@@ -1086,105 +1099,324 @@
         markdownInput.addEventListener('input', debouncedUpdate);
         markdownInput.addEventListener('paste', () => setTimeout(updatePreview, 0));
 
-        // Sample content
-        const sampleMarkdown = `# Welcome to Advanced Markdown Previewer! 🚀
+        // Sample content - More diverse examples
+        const sampleMarkdown = `# 🚀 Advanced Markdown Previewer
 
-This powerful editor supports **Markdown**, *LaTeX math*, and syntax highlighting with **smart per-block RTL detection**.
-
-## Math Examples with Colors
-
-Inline math with colors: $\\color{red}{E} = \\color{blue}{m}\\color{green}{c^2}$
-
-The famous equation: $\\color{purple}{F} = \\color{orange}{G}\\frac{\\color{red}{m_1}\\color{blue}{m_2}}{\\color{green}{r^2}}$
-
-Block math with colors:
-
-$$\\color{red}{\\int_{-\\infty}^{\\infty}} \\color{blue}{e^{-x^2}} \\color{green}{dx} = \\color{purple}{\\sqrt{\\pi}}$$
-
-Regular inline math: $E = mc^2$ and $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
-
-## Footnotes Example
-
-Einstein's theory of relativity[^1] revolutionized physics. The EPR paradox[^2] challenged quantum mechanics.
-
-[^1]: Published in 1905, this theory introduced the famous equation E=mc².
-[^2]: Einstein-Podolsky-Rosen paradox, proposed in 1935.
-
-## این یک عنوان فارسی است
-
-این یک پاراگراف به زبان فارسی است. این متن باید به صورت راست به چپ نمایش داده شود.
-
-### کد در متن فارسی
-
-در این خط چند کد \`first\` و \`second\` و \`third\` وجود دارد که باید به ترتیب درست نمایش داده شوند.
-
-همچنین \`console.log()\` و \`alert()\` و \`document.getElementById()\` نیز درست نمایش داده می‌شوند.
-
-## Code with Syntax Highlighting
-
-\`\`\`javascript
-// Fibonacci sequence generator
-function* fibonacci() {
-    let [a, b] = [0, 1];
-    while (true) {
-        yield a;
-        [a, b] = [b, a + b];
-    }
-}
-
-const fib = fibonacci();
-console.log([...Array(10)].map(() => fib.next().value));
-\`\`\`
-
-\`\`\`python
-# List comprehension example
-squares = [x**2 for x in range(10) if x % 2 == 0]
-print(f"Even squares: {squares}")
-\`\`\`
-
-## Per-Block Smart Direction
-
-This paragraph is in English, so it renders left-to-right.
-
-این پاراگراف فارسی است و راست به چپ نمایش داده می‌شود.
-
-Even this paragraph که شامل کلمات فارسی و English است will detect the majority and choose the right direction!
-
-## Features
-
-- **Real-time preview** with instant updates
-- **MathJax** with color support: $\\color{red}{x^2} + \\color{blue}{y^2} = \\color{green}{r^2}$
-- **Prism.js** for 200+ programming languages
-- **Smart per-block RTL/LTR** based on majority character analysis
-- **Footnotes** support with auto-numbering[^3]
-
-[^3]: Footnotes are rendered at the bottom of the document.
-
-## ویژگی‌ها
-
-- پیش‌نمایش **زنده** با بروزرسانی فوری
-- **MathJax** با پشتیبانی از رنگ: $\\color{red}{a} + \\color{blue}{b} = \\color{green}{c}$
-- **Prism.js** برای بیش از ۲۰۰ زبان برنامه‌نویسی
-- تشخیص **هوشمند RTL/LTR** برای هر بلوک
-
-> 💡 **Pro Tip:** Each block is analyzed independently for direction!
-
-> 💡 **نکته:** هر بلوک به صورت مستقل برای جهت متن تحلیل می‌شود!
+Welcome to this **powerful** Markdown editor with *real-time preview*, LaTeX math support, syntax highlighting, and **smart per-block RTL detection**.
 
 ---
 
-### Wide Math Formula (scroll to see all):
+## 📐 Mathematics Showcase
 
-$$\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6} \\quad \\text{and} \\quad \\prod_{p \\text{ prime}} \\frac{1}{1-p^{-s}} = \\sum_{n=1}^{\\infty} \\frac{1}{n^s} = \\zeta(s)$$
+### Basic Equations
 
-| Feature | Status | توضیحات |
-|---------|--------|---------|
-| Markdown | ✅ Ready | آماده |
-| MathJax Colors | ✅ Ready | آماده |
-| Footnotes | ✅ Ready | آماده |
-| Per-Block RTL | ✅ Ready | آماده |
+The famous mass-energy equivalence: $E = mc^2$
 
-**Happy writing!** ✨ **نوشتن خوش!**`;
+Euler's identity: $e^{i\\pi} + 1 = 0$
+
+Quadratic formula: $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
+
+### Colorful Math
+
+Colors in formulas: $\\color{red}{a^2} + \\color{blue}{b^2} = \\color{green}{c^2}$
+
+Gradient-like: $\\color{purple}{\\nabla} \\cdot \\color{orange}{\\vec{E}} = \\frac{\\color{red}{\\rho}}{\\color{blue}{\\varepsilon_0}}$
+
+### Block Equations
+
+The Gaussian integral:
+
+$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
+
+Maxwell's equations in differential form:
+
+$$\\nabla \\times \\vec{E} = -\\frac{\\partial \\vec{B}}{\\partial t}$$
+
+Schrödinger equation:
+
+$$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$$
+
+### Matrix Example
+
+$$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} ax + by \\\\ cx + dy \\end{pmatrix}$$
+
+---
+
+## 🇮🇷 بخش فارسی
+
+### ریاضیات به فارسی
+
+معادله انیشتین $E = mc^2$ فیزیک را متحول کرد.
+
+فرمول انتگرال گاوسی به صورت زیر است:
+
+$$\\int_{-\\infty}^{+\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
+
+### متن فارسی با فرمول رنگی
+
+در این معادله $\\color{red}{x}$ مجهول و $\\color{blue}{a}$ و $\\color{green}{b}$ ثابت هستند.
+
+### فرمول با متن فارسی داخل آن
+
+برای نوشتن فارسی در فرمول از دستور text استفاده کنید:
+
+$$F = m \\cdot a \\quad \\text{(قانون دوم نیوتون)}$$
+
+$$E = \\frac{1}{2}mv^2 \\quad \\text{انرژی جنبشی}$$
+
+### کد در متن فارسی
+
+در این خط چند کد \`first\` و \`second\` و \`third\` وجود دارد.
+
+برای اجرای برنامه از دستور \`npm start\` و یا \`yarn dev\` استفاده کنید.
+
+توابع مهم جاوااسکریپت: \`console.log()\` و \`document.getElementById()\` و \`addEventListener()\`
+
+---
+
+## 💻 Code Examples
+
+### JavaScript - Async/Await
+
+\`\`\`javascript
+// Fetch data with async/await
+async function fetchUserData(userId) {
+    try {
+        const response = await fetch(\`/api/users/\${userId}\`);
+        if (!response.ok) throw new Error('User not found');
+        
+        const user = await response.json();
+        console.log(\`Welcome, \${user.name}!\`);
+        return user;
+    } catch (error) {
+        console.error('Failed to fetch user:', error.message);
+        throw error;
+    }
+}
+
+// Usage with Promise.all
+const users = await Promise.all([
+    fetchUserData(1),
+    fetchUserData(2),
+    fetchUserData(3)
+]);
+\`\`\`
+
+### Python - Data Science
+
+\`\`\`python
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
+# Load and prepare data
+df = pd.read_csv('data.csv')
+X = df.drop('target', axis=1)
+y = df['target']
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train model
+model = RandomForestClassifier(n_estimators=100)
+model.fit(X_train, y_train)
+
+# Evaluate
+accuracy = model.score(X_test, y_test)
+print(f"Model accuracy: {accuracy:.2%}")
+\`\`\`
+
+### TypeScript - Generic Types
+
+\`\`\`typescript
+interface Repository<T> {
+    find(id: string): Promise<T | null>;
+    save(entity: T): Promise<T>;
+    delete(id: string): Promise<boolean>;
+}
+
+class UserRepository implements Repository<User> {
+    private users: Map<string, User> = new Map();
+    
+    async find(id: string): Promise<User | null> {
+        return this.users.get(id) ?? null;
+    }
+    
+    async save(user: User): Promise<User> {
+        this.users.set(user.id, user);
+        return user;
+    }
+    
+    async delete(id: string): Promise<boolean> {
+        return this.users.delete(id);
+    }
+}
+\`\`\`
+
+### Rust - Ownership
+
+\`\`\`rust
+fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1.clone(); // Deep copy
+    
+    println!("s1 = {}, s2 = {}", s1, s2);
+    
+    // Ownership transfer
+    let s3 = s1; // s1 is now invalid
+    
+    // Borrowing
+    let len = calculate_length(&s3);
+    println!("Length of '{}' is {}", s3, len);
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+\`\`\`
+
+### SQL - Complex Query
+
+\`\`\`sql
+WITH monthly_sales AS (
+    SELECT 
+        DATE_TRUNC('month', order_date) AS month,
+        product_id,
+        SUM(quantity * unit_price) AS revenue
+    FROM orders
+    WHERE order_date >= '2024-01-01'
+    GROUP BY 1, 2
+)
+SELECT 
+    p.name AS product_name,
+    ms.month,
+    ms.revenue,
+    LAG(ms.revenue) OVER (
+        PARTITION BY ms.product_id 
+        ORDER BY ms.month
+    ) AS prev_month_revenue,
+    ROUND(
+        (ms.revenue - LAG(ms.revenue) OVER (
+            PARTITION BY ms.product_id 
+            ORDER BY ms.month
+        )) / LAG(ms.revenue) OVER (
+            PARTITION BY ms.product_id 
+            ORDER BY ms.month
+        ) * 100, 2
+    ) AS growth_percentage
+FROM monthly_sales ms
+JOIN products p ON p.id = ms.product_id
+ORDER BY p.name, ms.month;
+\`\`\`
+
+### CSS - Modern Layout
+
+\`\`\`css
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: clamp(1rem, 5vw, 3rem);
+}
+
+.card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.1),
+        0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.15),
+            0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+}
+\`\`\`
+
+---
+
+## 📝 Footnotes Example
+
+The theory of relativity[^1] changed our understanding of space and time. Quantum mechanics[^2] describes the behavior of particles at the atomic scale. The Standard Model[^3] explains fundamental forces.
+
+[^1]: Albert Einstein published his theory of special relativity in 1905.
+[^2]: Developed in the early 20th century by Planck, Bohr, Heisenberg, and others.
+[^3]: The Standard Model of particle physics was developed in the 1970s.
+
+---
+
+## 📊 Tables
+
+| Algorithm | Time Complexity | Space Complexity | Stable |
+|-----------|-----------------|------------------|--------|
+| Bubble Sort | O(n²) | O(1) | ✅ Yes |
+| Quick Sort | O(n log n) | O(log n) | ❌ No |
+| Merge Sort | O(n log n) | O(n) | ✅ Yes |
+| Heap Sort | O(n log n) | O(1) | ❌ No |
+
+| ویژگی | وضعیت | توضیحات |
+|-------|-------|---------|
+| مارک‌داون | ✅ فعال | پشتیبانی کامل |
+| ریاضیات | ✅ فعال | با رنگ و فارسی |
+| کد | ✅ فعال | +۲۰۰ زبان |
+
+---
+
+## 📌 Lists
+
+### Ordered List
+
+1. First item
+2. Second item
+3. Third item with inline code \`example\`
+4. Fourth item with math $x^2 + y^2 = z^2$
+
+### Unordered List
+
+- Item with **bold** text
+- Item with *italic* text
+- Item with \`code\`
+- Item with [link](https://example.com)
+
+### لیست فارسی
+
+- مورد اول با **متن پررنگ**
+- مورد دوم با فرمول $a + b = c$
+- مورد سوم با کد \`console.log()\`
+
+---
+
+## 💬 Blockquotes
+
+> "The only way to do great work is to love what you do."
+> — Steve Jobs
+
+> 💡 **Pro Tip:** Use \`\\text{فارسی}\` for Persian text inside math formulas!
+
+> 📝 **نکته:** برای نوشتن فارسی در فرمول‌ها از \`\\text{متن فارسی}\` استفاده کنید!
+
+---
+
+## 🔗 Links & Images
+
+Check out [GitHub](https://github.com) | [MDN Web Docs](https://developer.mozilla.org) | [Stack Overflow](https://stackoverflow.com)
+
+---
+
+## ✨ Mixed Content
+
+This paragraph contains both English and فارسی text with inline math $\\alpha + \\beta = \\gamma$ and code \`function()\`.
+
+این پاراگراف شامل متن فارسی و English با فرمول درون‌خطی $x = \\frac{-b}{2a}$ و کد \`npm install\` است.
+
+**Happy writing!** ✨ **نوشتن خوش!** 🎉`;
 
         // Initialize with sample content
         markdownInput.value = sampleMarkdown;
