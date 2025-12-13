@@ -394,6 +394,11 @@
             margin-left: 0.5em;
         }
 
+        /* BDI elements for isolated Latin text in RTL */
+        .markdown-body bdi {
+            unicode-bidi: isolate;
+        }
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 10px;
@@ -964,6 +969,76 @@
             return { rtlCount, ltrCount };
         }
 
+        // ============================================
+        // BIDI TEXT ISOLATION - Fix for mixed RTL/LTR
+        // ============================================
+        
+        // Isolate Latin character sequences within RTL elements using <bdi> tags
+        // This must run AFTER MathJax has rendered to avoid breaking math
+        function isolateLatinInRTL(container) {
+            const rtlElements = container.querySelectorAll('[dir="rtl"]');
+            
+            rtlElements.forEach(el => {
+                // Skip code elements
+                if (el.tagName === 'PRE' || el.tagName === 'CODE') return;
+                if (el.closest('pre') || el.closest('code')) return;
+                
+                // Collect all text nodes first (avoid modifying while iterating)
+                const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+                const textNodes = [];
+                let currentNode;
+                while (currentNode = walker.nextNode()) {
+                    // Skip text inside code, pre, bdi, or MathJax elements
+                    const parent = currentNode.parentElement;
+                    if (parent && !parent.closest('code, pre, bdi, mjx-container, mjx-math, mjx-mrow, mjx-mi, mjx-mo, mjx-mn, mjx-mtext, mjx-msup, mjx-msub, mjx-mfrac, mjx-msqrt, mjx-mroot, mjx-mtable, mjx-mtr, mjx-mtd, script, style')) {
+                        textNodes.push(currentNode);
+                    }
+                }
+                
+                // Process each text node
+                textNodes.forEach(textNode => {
+                    const text = textNode.textContent;
+                    
+                    // Match Latin letter sequences (including those with numbers)
+                    const regex = /[A-Za-z][A-Za-z0-9]*/g;
+                    
+                    if (!regex.test(text)) return;
+                    regex.lastIndex = 0;
+                    
+                    const fragment = document.createDocumentFragment();
+                    let lastIndex = 0;
+                    let match;
+                    let hasMatches = false;
+                    
+                    while ((match = regex.exec(text)) !== null) {
+                        hasMatches = true;
+                        
+                        // Add text before the match
+                        if (match.index > lastIndex) {
+                            fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+                        }
+                        
+                        // Wrap Latin sequence in <bdi> for isolation
+                        const bdi = document.createElement('bdi');
+                        bdi.textContent = match[0];
+                        fragment.appendChild(bdi);
+                        
+                        lastIndex = regex.lastIndex;
+                    }
+                    
+                    // Add remaining text after last match
+                    if (lastIndex < text.length) {
+                        fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                    }
+                    
+                    // Replace the text node with the fragment if we made changes
+                    if (hasMatches && textNode.parentNode) {
+                        textNode.parentNode.replaceChild(fragment, textNode);
+                    }
+                });
+            });
+        }
+
         // Update direction indicator UI
         function updateDirectionIndicator(rtlCount, ltrCount) {
             const total = rtlCount + ltrCount;
@@ -1069,16 +1144,27 @@
             
             markdownOutput.innerHTML = html;
             
+            // Apply per-block direction
             const directionCounts = applyPerBlockDirection(markdownOutput);
+            
             updateDirectionIndicator(directionCounts.rtlCount, directionCounts.ltrCount);
             
             Prism.highlightAllUnder(markdownOutput);
             
+            // Process MathJax first, then apply bidi isolation
             if (window.MathJax && window.MathJax.typesetPromise) {
                 MathJax.typesetClear([markdownOutput]);
-                MathJax.typesetPromise([markdownOutput]).catch((err) => {
+                MathJax.typesetPromise([markdownOutput]).then(() => {
+                    // Isolate Latin characters AFTER MathJax has rendered
+                    isolateLatinInRTL(markdownOutput);
+                }).catch((err) => {
                     console.error('MathJax error:', err);
+                    // Still try to isolate Latin even if MathJax fails
+                    isolateLatinInRTL(markdownOutput);
                 });
+            } else {
+                // If MathJax not available, just isolate Latin
+                isolateLatinInRTL(markdownOutput);
             }
         }
 
@@ -1172,6 +1258,12 @@ $$E = \\frac{1}{2}mv^2 \\quad \\text{انرژی جنبشی}$$
 برای اجرای برنامه از دستور \`npm start\` و یا \`yarn dev\` استفاده کنید.
 
 توابع مهم جاوااسکریپت: \`console.log()\` و \`document.getElementById()\` و \`addEventListener()\`
+
+### تست ترتیب حروف لاتین
+
+این شامل موارد A، B و C است.
+
+گزینه‌های X، Y و Z را بررسی کنید.
 
 ---
 
