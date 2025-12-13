@@ -836,10 +836,11 @@
             const ids = footnoteStorage.footnoteRefs;
             if (ids.length === 0) return html;
             
-            let footnotesHtml = '<section class="footnotes"><hr><ol>';
+            let footnotesHtml = '<section class="footnotes"><ol>';
             ids.forEach((id, index) => {
                 const content = footnoteStorage.footnotes[id] || 'Footnote not defined';
-                footnotesHtml += `<li id="fn-${id}"><p>${escapeHtml(content)} <a href="#fnref-${id}" class="footnote-backref">↩</a></p></li>`;
+                const parsedContent = marked.parseInline(content);
+                footnotesHtml += `<li id="fn-${id}"><p>${parsedContent} <a href="#fnref-${id}" class="footnote-backref">↩</a></p></li>`;
             });
             footnotesHtml += '</ol></section>';
             
