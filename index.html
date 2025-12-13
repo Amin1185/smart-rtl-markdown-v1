@@ -110,7 +110,7 @@
             overflow-y: auto;
         }
 
-        /* Markdown output styling - PLAIN STYLES */
+        /* Markdown output styling */
         .markdown-body {
             font-family: 'Vazirmatn', 'Inter', sans-serif;
             line-height: 1.8;
@@ -229,6 +229,7 @@
             color: #004499;
         }
 
+        /* Inline code with proper RTL isolation */
         .markdown-body code:not([class*="language-"]) {
             background: #f4f4f4;
             padding: 0.2em 0.4em;
@@ -237,6 +238,11 @@
             font-size: 0.9em;
             color: #333;
             border: 1px solid #ddd;
+            unicode-bidi: isolate;
+            direction: ltr;
+            display: inline-block;
+            vertical-align: baseline;
+            white-space: nowrap;
         }
 
         /* Code blocks with horizontal scroll */
@@ -257,6 +263,8 @@
             line-height: 1.6;
             display: block;
             min-width: max-content;
+            unicode-bidi: normal;
+            white-space: pre;
         }
 
         .markdown-body blockquote {
@@ -305,28 +313,20 @@
             background: white;
         }
 
-        /* MathJax styling with overflow */
-        .markdown-body .MathJax {
-            font-size: 1.1em;
-        }
-
-        /* Fix inline math alignment */
+        /* Inline MathJax - NO scrollbars, proper alignment */
         mjx-container:not([display="true"]) {
-            vertical-align: -0.40em !important;
+            display: inline-block !important;
+            overflow: visible !important;
+            vertical-align: middle !important;
             margin: 0 2px !important;
-        }
-        
-        .markdown-body mjx-container {
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 0.25em 0;
-            max-width: 100%;
-            display: inline-block;
+            padding: 0 !important;
+            max-width: none !important;
         }
 
-        .markdown-body mjx-container[display="true"] {
+        /* Block/display math styling with potential scrollbar for wide formulas */
+        mjx-container[display="true"] {
             display: block !important;
-            margin: 1em 0;
+            margin: 1em auto !important;
             padding: 1em;
             background: #fffbeb;
             border-radius: 8px;
@@ -334,6 +334,51 @@
             text-align: center !important;
             direction: ltr !important;
             overflow-x: auto;
+            overflow-y: hidden;
+            max-width: 100%;
+        }
+
+        /* Footnotes styling */
+        .markdown-body .footnotes {
+            margin-top: 2em;
+            padding-top: 1em;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .markdown-body .footnotes ol {
+            padding-left: 1.5em;
+        }
+
+        .markdown-body .footnotes li {
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-body .footnotes li p {
+            display: inline;
+            margin: 0;
+        }
+
+        .markdown-body .footnote-ref {
+            font-size: 0.75em;
+            vertical-align: super;
+            line-height: 0;
+        }
+
+        .markdown-body .footnote-ref a {
+            text-decoration: none;
+            color: #6366f1;
+            padding: 0 2px;
+        }
+
+        .markdown-body .footnote-ref a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-body .footnote-backref {
+            text-decoration: none;
+            margin-left: 0.5em;
         }
 
         /* Custom scrollbar */
@@ -493,6 +538,7 @@
                 <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🔢 MathJax</span>
                 <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🎨 Syntax Highlight</span>
                 <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🔄 Per-Block RTL/LTR</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">📌 Footnotes</span>
             </div>
         </div>
     </header>
@@ -545,7 +591,10 @@
 - **Bold** and *italic* text
 - Math: $E = mc^2$ or $$\int_0^\infty f(x)dx$$
 - Code blocks with syntax highlighting
-- Per-block RTL/LTR detection"
+- Per-block RTL/LTR detection
+- Footnotes[^1]
+
+[^1]: This is a footnote!"
                         spellcheck="false"
                     ></textarea>
                 </div>
@@ -594,7 +643,7 @@
         </div>
 
         <!-- Quick Reference Cards -->
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
             <!-- Markdown Reference -->
             <div class="glass-card p-6">
                 <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
@@ -637,13 +686,34 @@
                         <span class="text-slate-500">Block</span>
                     </div>
                     <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-purple-600 font-mono">$\frac{a}{b}$</code>
-                        <span class="text-slate-500">Fraction</span>
+                        <code class="text-purple-600 font-mono">\color{red}{x}</code>
+                        <span class="text-slate-500">Colors</span>
                     </div>
                     <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
                         <code class="text-purple-600 font-mono">$\sqrt{x}$</code>
                         <span class="text-slate-500">Square root</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Footnotes Reference -->
+            <div class="glass-card p-6">
+                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                    <span class="p-2 bg-amber-100 rounded-lg">📌</span>
+                    Footnotes
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="p-2 bg-slate-50 rounded-lg">
+                        <code class="text-amber-600 font-mono block">Text[^1]</code>
+                        <span class="text-slate-500 text-xs">Reference</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded-lg">
+                        <code class="text-amber-600 font-mono block">[^1]: Note text</code>
+                        <span class="text-slate-500 text-xs">Definition</span>
+                    </div>
+                    <p class="text-slate-500 text-xs mt-2">
+                        Footnotes appear at the bottom of the preview.
+                    </p>
                 </div>
             </div>
 
@@ -682,10 +752,92 @@
                 .replace(/"/g, '&quot;');
         }
 
-        // Configure marked.js with custom renderer - FIXED: removed broken table renderer
+        // ============================================
+        // FOOTNOTE EXTENSION FOR MARKED.JS
+        // ============================================
+        
+        const footnoteStorage = {
+            footnotes: {},
+            footnoteRefs: [],
+            reset() {
+                this.footnotes = {};
+                this.footnoteRefs = [];
+            }
+        };
+
+        // Extension to handle footnote references [^1]
+        const footnoteRefExtension = {
+            name: 'footnoteRef',
+            level: 'inline',
+            start(src) {
+                return src.match(/\[\^/)?.index;
+            },
+            tokenizer(src) {
+                const match = /^\[\^([^\]]+)\](?!\:)/.exec(src);
+                if (match) {
+                    const id = match[1].trim();
+                    if (!footnoteStorage.footnoteRefs.includes(id)) {
+                        footnoteStorage.footnoteRefs.push(id);
+                    }
+                    return {
+                        type: 'footnoteRef',
+                        raw: match[0],
+                        id: id,
+                        refIndex: footnoteStorage.footnoteRefs.indexOf(id) + 1
+                    };
+                }
+            },
+            renderer(token) {
+                return `<sup class="footnote-ref"><a href="#fn-${token.id}" id="fnref-${token.id}">[${token.refIndex}]</a></sup>`;
+            }
+        };
+
+        // Extension to handle footnote definitions [^1]: text
+        const footnoteDefExtension = {
+            name: 'footnoteDef',
+            level: 'block',
+            start(src) {
+                return src.match(/^\[\^[^\]]+\]:/)?.index;
+            },
+            tokenizer(src) {
+                const match = /^\[\^([^\]]+)\]:\s*(.+?)(?:\n|$)/.exec(src);
+                if (match) {
+                    const id = match[1].trim();
+                    const content = match[2].trim();
+                    footnoteStorage.footnotes[id] = content;
+                    return {
+                        type: 'footnoteDef',
+                        raw: match[0],
+                        id: id,
+                        content: content
+                    };
+                }
+            },
+            renderer(token) {
+                return '';
+            }
+        };
+
+        // Function to append footnotes section
+        function appendFootnotesSection(html) {
+            const ids = footnoteStorage.footnoteRefs;
+            if (ids.length === 0) return html;
+            
+            let footnotesHtml = '<section class="footnotes"><hr><ol>';
+            ids.forEach((id, index) => {
+                const content = footnoteStorage.footnotes[id] || 'Footnote not defined';
+                footnotesHtml += `<li id="fn-${id}"><p>${escapeHtml(content)} <a href="#fnref-${id}" class="footnote-backref">↩</a></p></li>`;
+            });
+            footnotesHtml += '</ol></section>';
+            
+            return html + footnotesHtml;
+        }
+
+        // Configure marked.js with custom renderer and footnote extensions
         marked.use({
             breaks: true,
             gfm: true,
+            extensions: [footnoteRefExtension, footnoteDefExtension],
             renderer: {
                 code({text, lang, escaped}) {
                     const langClass = lang ? escapeHtml(lang.split(/\s/)[0]) : 'plaintext';
@@ -704,7 +856,6 @@
             
                     return `<pre class="language-${langClass}"><code class="language-${langClass}">${highlighted}</code></pre>`;
                 }
-                // Table renderer removed - let marked handle it natively
             }
         });
 
@@ -729,15 +880,14 @@
 
         // Count Persian vs Latin characters in text
         function countCharacterTypes(text) {
-            // Remove code, math, and special characters for accurate counting
             const cleanText = text
-                .replace(/<[^>]*>/g, '') // Remove HTML tags
-                .replace(/\$\$[\s\S]*?\$\$/g, '') // Remove block math
-                .replace(/\$[^$]+\$/g, '') // Remove inline math
-                .replace(/`[^`]+`/g, '') // Remove inline code
-                .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-                .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs
-                .replace(/[0-9\s\p{P}\p{S}]/gu, ''); // Remove numbers, spaces, punctuation, symbols
+                .replace(/<[^>]*>/g, '')
+                .replace(/\$\$[\s\S]*?\$\$/g, '')
+                .replace(/\$[^$]+\$/g, '')
+                .replace(/`[^`]+`/g, '')
+                .replace(/```[\s\S]*?```/g, '')
+                .replace(/https?:\/\/[^\s]+/g, '')
+                .replace(/[0-9\s\p{P}\p{S}]/gu, '');
             
             const persianMatches = cleanText.match(PERSIAN_ARABIC_PATTERN) || [];
             const latinMatches = cleanText.match(LATIN_PATTERN) || [];
@@ -752,12 +902,10 @@
         function getElementDirection(text) {
             const counts = countCharacterTypes(text);
             
-            // If no significant characters, default to LTR
             if (counts.persian === 0 && counts.latin === 0) {
                 return 'ltr';
             }
             
-            // Majority-based decision
             return counts.persian > counts.latin ? 'rtl' : 'ltr';
         }
 
@@ -766,27 +914,22 @@
             let rtlCount = 0;
             let ltrCount = 0;
             
-            // Elements to process for direction
             const blockSelectors = [
                 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                 'li', 'blockquote', 'th', 'td'
             ];
             
-            // Process lists separately for proper direction
             const lists = container.querySelectorAll('ul, ol');
             lists.forEach(list => {
-                // Analyze all text content of the list
                 const listText = list.textContent || '';
                 const direction = getElementDirection(listText);
                 list.setAttribute('dir', direction);
                 if (direction === 'rtl') rtlCount++; else ltrCount++;
             });
             
-            // Process each block element
             blockSelectors.forEach(selector => {
                 const elements = container.querySelectorAll(selector);
                 elements.forEach(el => {
-                    // Skip if it's inside a pre/code block
                     if (el.closest('pre') || el.closest('code')) {
                         return;
                     }
@@ -858,7 +1001,7 @@
             const mathBlocks = [];
             const inlineMaths = [];
             
-            // Escape block math $$...$$
+            // Escape block math $$...$$ (including multiline)
             text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
                 mathBlocks.push(match);
                 return `%%MATHBLOCK${mathBlocks.length - 1}%%`;
@@ -875,12 +1018,10 @@
 
         // Restore math expressions after markdown parsing
         function restoreMath(html, mathBlocks, inlineMaths) {
-            // Restore block math
             mathBlocks.forEach((math, i) => {
                 html = html.replace(`%%MATHBLOCK${i}%%`, math);
             });
             
-            // Restore inline math
             inlineMaths.forEach((math, i) => {
                 html = html.replace(`%%MATHINLINE${i}%%`, math);
             });
@@ -892,7 +1033,6 @@
         function updatePreview() {
             const rawMarkdown = markdownInput.value;
             
-            // Update stats
             updateStats(rawMarkdown);
             
             if (rawMarkdown.trim() === '') {
@@ -901,29 +1041,25 @@
                 return;
             }
             
-            // Escape math before parsing markdown
+            footnoteStorage.reset();
+            
             const { text, mathBlocks, inlineMaths } = escapeMath(rawMarkdown);
             
-            // Parse markdown
             let html = marked.parse(text);
             
-            // Restore math expressions
             html = restoreMath(html, mathBlocks, inlineMaths);
             
-            // Wrap tables with scrollable container
             html = wrapTables(html);
             
-            // Update output
+            html = appendFootnotesSection(html);
+            
             markdownOutput.innerHTML = html;
             
-            // Apply per-block direction detection
             const directionCounts = applyPerBlockDirection(markdownOutput);
             updateDirectionIndicator(directionCounts.rtlCount, directionCounts.ltrCount);
             
-            // Re-highlight any code blocks that might have been missed
             Prism.highlightAllUnder(markdownOutput);
             
-            // Re-render MathJax
             if (window.MathJax && window.MathJax.typesetPromise) {
                 MathJax.typesetClear([markdownOutput]);
                 MathJax.typesetPromise([markdownOutput]).catch((err) => {
@@ -950,28 +1086,39 @@
         markdownInput.addEventListener('input', debouncedUpdate);
         markdownInput.addEventListener('paste', () => setTimeout(updatePreview, 0));
 
-        // Sample content showcasing all features including per-block direction
+        // Sample content
         const sampleMarkdown = `# Welcome to Advanced Markdown Previewer! 🚀
 
 This powerful editor supports **Markdown**, *LaTeX math*, and syntax highlighting with **smart per-block RTL detection**.
 
-## Math Examples
+## Math Examples with Colors
 
-Inline math: The famous equation $E = mc^2$ changed physics forever.
+Inline math with colors: $\\color{red}{E} = \\color{blue}{m}\\color{green}{c^2}$
 
-Block math for complex formulas:
+The famous equation: $\\color{purple}{F} = \\color{orange}{G}\\frac{\\color{red}{m_1}\\color{blue}{m_2}}{\\color{green}{r^2}}$
 
-$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
+Block math with colors:
 
-The quadratic formula: $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
+$$\\color{red}{\\int_{-\\infty}^{\\infty}} \\color{blue}{e^{-x^2}} \\color{green}{dx} = \\color{purple}{\\sqrt{\\pi}}$$
+
+Regular inline math: $E = mc^2$ and $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
+
+## Footnotes Example
+
+Einstein's theory of relativity[^1] revolutionized physics. The EPR paradox[^2] challenged quantum mechanics.
+
+[^1]: Published in 1905, this theory introduced the famous equation E=mc².
+[^2]: Einstein-Podolsky-Rosen paradox, proposed in 1935.
 
 ## این یک عنوان فارسی است
 
 این یک پاراگراف به زبان فارسی است. این متن باید به صورت راست به چپ نمایش داده شود.
 
-### ریاضیات به فارسی
+### کد در متن فارسی
 
-معادله معروف انیشتین $E = mc^2$ فیزیک را متحول کرد.
+در این خط چند کد \`first\` و \`second\` و \`third\` وجود دارد که باید به ترتیب درست نمایش داده شوند.
+
+همچنین \`console.log()\` و \`alert()\` و \`document.getElementById()\` نیز درست نمایش داده می‌شوند.
 
 ## Code with Syntax Highlighting
 
@@ -1006,14 +1153,17 @@ Even this paragraph که شامل کلمات فارسی و English است will d
 ## Features
 
 - **Real-time preview** with instant updates
-- **MathJax** for beautiful mathematical typesetting
+- **MathJax** with color support: $\\color{red}{x^2} + \\color{blue}{y^2} = \\color{green}{r^2}$
 - **Prism.js** for 200+ programming languages
 - **Smart per-block RTL/LTR** based on majority character analysis
+- **Footnotes** support with auto-numbering[^3]
+
+[^3]: Footnotes are rendered at the bottom of the document.
 
 ## ویژگی‌ها
 
 - پیش‌نمایش **زنده** با بروزرسانی فوری
-- **MathJax** برای نمایش زیبای فرمول‌های ریاضی
+- **MathJax** با پشتیبانی از رنگ: $\\color{red}{a} + \\color{blue}{b} = \\color{green}{c}$
 - **Prism.js** برای بیش از ۲۰۰ زبان برنامه‌نویسی
 - تشخیص **هوشمند RTL/LTR** برای هر بلوک
 
@@ -1023,10 +1173,6 @@ Even this paragraph که شامل کلمات فارسی و English است will d
 
 ---
 
-### Links & Formatting
-
-Check out [GitHub](https://github.com) for more tools.
-
 ### Wide Math Formula (scroll to see all):
 
 $$\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6} \\quad \\text{and} \\quad \\prod_{p \\text{ prime}} \\frac{1}{1-p^{-s}} = \\sum_{n=1}^{\\infty} \\frac{1}{n^s} = \\zeta(s)$$
@@ -1034,8 +1180,8 @@ $$\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6} \\quad \\text{and} \\
 | Feature | Status | توضیحات |
 |---------|--------|---------|
 | Markdown | ✅ Ready | آماده |
-| MathJax | ✅ Ready | آماده |
-| Syntax Highlight | ✅ Ready | آماده |
+| MathJax Colors | ✅ Ready | آماده |
+| Footnotes | ✅ Ready | آماده |
 | Per-Block RTL | ✅ Ready | آماده |
 
 **Happy writing!** ✨ **نوشتن خوش!**`;
