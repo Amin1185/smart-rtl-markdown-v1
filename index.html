@@ -914,16 +914,22 @@
                     const text = textNode.textContent;
                     
                     /**
-                     * Regex explanation:
-                     * - [^\s\u0600-\u06FF...]* - Optional non-RTL, non-space chars before (like ++, @, etc.)
-                     * - [A-Za-z] - At least one Latin letter (required)
-                     * - [^\s\u0600-\u06FF...]* - Optional non-RTL, non-space chars after
-                     * - (?:\s+...)* - Optionally repeat for multiple words separated by spaces
+                     * Regex to match Latin text sequences while EXCLUDING:
                      * 
-                     * This captures: "C++", "++C", "@user", "my name is amin", "C++ programming"
+                     * - RTL characters (Persian/Arabic Unicode ranges)
+                     * - Whitespace (\s)
+                     * - All brackets and quotation marks:
+                     *   
+                     *   Standard:     ( ) [ ] { } < >
+                     *   Guillemets:   « » ‹ ›
+                     *   Curly quotes: " " ' '
+                     *   Straight:     " '
+                     *   CJK:          「  」 『 』 【 】 〔 〕 〈 〉 《 》
+                     *   Math:         ⟨ ⟩ ⟪ ⟫
+                     *   Other:        ⦃ ⦄ ⦗ ⦘ ⁽ ⁾ ₍ ₎
                      */
-                    const regex = /[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*(?:\s+[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*)*/g;
-                    
+                    const regex = /[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*(?:\s+[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*)*/g;
+                            
                     if (!regex.test(text)) return;
                     regex.lastIndex = 0;  // Reset regex state
                     
