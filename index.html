@@ -1000,7 +1000,7 @@
                     const text = textNode.textContent;
                     
                     // Match Latin letter sequences (including those with numbers)
-                    const regex = /[A-Za-z][A-Za-z0-9]*/g;
+                    const regex = /[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*(?:\s+[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*)*/g;
                     
                     if (!regex.test(text)) return;
                     regex.lastIndex = 0;
@@ -1018,10 +1018,27 @@
                             fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
                         }
                         
-                        // Wrap Latin sequence in <bdi> for isolation
-                        const bdi = document.createElement('bdi');
-                        bdi.textContent = match[0];
-                        fragment.appendChild(bdi);
+                        let matchedText = match[0];
+                        let trailingPunct = '';
+                        
+                        // Strip trailing sentence punctuation (should stay outside the isolated block)
+                        const trailingMatch = matchedText.match(/[.!?,;:]+$/);
+                        if (trailingMatch) {
+                            trailingPunct = trailingMatch[0];
+                            matchedText = matchedText.slice(0, -trailingPunct.length);
+                        }
+                        
+                        // Wrap Latin sequence in <bdi> for isolation (if content remains)
+                        if (matchedText) {
+                            const bdi = document.createElement('bdi');
+                            bdi.textContent = matchedText;
+                            fragment.appendChild(bdi);
+                        }
+                        
+                        // Add trailing punctuation outside the isolation
+                        if (trailingPunct) {
+                            fragment.appendChild(document.createTextNode(trailingPunct));
+                        }
                         
                         lastIndex = regex.lastIndex;
                     }
