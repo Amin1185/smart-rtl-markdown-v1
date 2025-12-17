@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Markdown Previewer</title>
+    <title>Markdown Previewer</title>
     <meta name="description" content="Smart RTL-aware Markdown previewer with MathJax, Prism, and Tailwind-like styles.">
     
-    <!-- Tailwind CSS -->
+    <!-- =============================================
+         EXTERNAL DEPENDENCIES
+         ============================================= -->
+    
+    <!-- Tailwind CSS - Utility-first CSS framework -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
-    <!-- Marked.js for Markdown -->
+    <!-- Marked.js - Fast Markdown parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <!-- Prism.js for Syntax Highlighting -->
+    <!-- Prism.js - Syntax highlighting for code blocks -->
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     
-    <!-- MathJax for LaTeX with Persian/Arabic support -->
+    <!-- MathJax - LaTeX math rendering with RTL language support -->
     <script>
         window.MathJax = {
             tex: {
-                inlineMath: [['$', '$']],
-                displayMath: [['$$', '$$']],
+                inlineMath: [['$', '$']],       // Single $ for inline math
+                displayMath: [['$$', '$$']],    // Double $$ for block math
                 processEscapes: true,
                 processEnvironments: true
             },
             options: {
+                // Don't process math inside these HTML tags
                 skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
             },
             chtml: {
-                mtextInheritFont: true,
+                mtextInheritFont: true,  // Use document font for \text{} commands
                 scale: 1
             },
             svg: {
@@ -40,24 +45,27 @@
             startup: {
                 ready: () => {
                     MathJax.startup.defaultReady();
-                    window.mathJaxReady = true;
+                    window.mathJaxReady = true;  // Flag to check if MathJax is ready
                 }
             }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
-    <!-- Fonts -->
+    <!-- Google Fonts - Vazirmatn for Persian, Inter for Latin, JetBrains Mono for code -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
+    <!-- =============================================
+         STYLES
+         ============================================= -->
     <style>
+        /* ----- CSS Variables ----- */
         :root {
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            --card-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            --border-radius: 16px;
+            --border-radius: 12px;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -66,66 +74,51 @@
 
         body {
             font-family: 'Inter', 'Vazirmatn', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #f8fafc;
             min-height: 100vh;
         }
 
-        /* Header gradient animation */
-        .header-gradient {
-            background: var(--primary-gradient);
-            background-size: 200% 200%;
-            animation: gradientShift 8s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        /* Glass morphism effect */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: var(--card-shadow-lg);
+        /* ----- Card Styling ----- */
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow-sm);
             border-radius: var(--border-radius);
         }
 
-        /* Editor styling */
+        /* ----- Editor Textarea ----- */
         .editor-textarea {
             font-family: 'JetBrains Mono', monospace;
             font-size: 14px;
             line-height: 1.7;
             resize: none;
-            background: #1e1e2e;
-            color: #cdd6f4;
+            background: #1e293b;
+            color: #e2e8f0;
             border: none;
-            transition: all 0.3s ease;
         }
 
         .editor-textarea::placeholder {
-            color: #6c7086;
+            color: #64748b;
         }
 
         .editor-textarea:focus {
             outline: none;
-            box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.5);
         }
 
-        /* Preview container with overflow handling */
+        /* ----- Preview Container ----- */
         .preview-container {
             overflow-x: auto;
             overflow-y: auto;
         }
 
-        /* Markdown output styling */
+        /* ----- Markdown Output Base Styles ----- */
         .markdown-body {
             font-family: 'Vazirmatn', 'Inter', sans-serif;
             line-height: 1.8;
-            color: #333;
+            color: #334155;
         }
 
-        /* Per-block direction styles */
+        /* ----- RTL/LTR Direction Handling ----- */
         .markdown-body [dir="rtl"] {
             direction: rtl;
             text-align: right;
@@ -136,7 +129,7 @@
             text-align: left;
         }
 
-        /* RTL list adjustments */
+        /* RTL list padding adjustment */
         .markdown-body ul[dir="rtl"], 
         .markdown-body ol[dir="rtl"] {
             padding-left: 0;
@@ -149,67 +142,66 @@
             padding-right: 0;
         }
 
-        /* Blockquote RTL/LTR adjustments */
+        /* RTL blockquote border adjustment */
         .markdown-body blockquote[dir="rtl"] {
             border-left: none;
-            border-right: 4px solid #ddd;
+            border-right: 3px solid #cbd5e1;
             padding-right: 1em;
             padding-left: 0;
         }
 
         .markdown-body blockquote[dir="ltr"] {
             border-right: none;
-            border-left: 4px solid #ddd;
+            border-left: 3px solid #cbd5e1;
             padding-left: 1em;
             padding-right: 0;
         }
 
-        /* Plain headings */
+        /* ----- Typography ----- */
         .markdown-body h1 {
-            font-size: 2em;
+            font-size: 1.875em;
             font-weight: 700;
             margin: 0.67em 0;
-            color: #1a1a1a;
+            color: #0f172a;
         }
 
         .markdown-body h2 {
             font-size: 1.5em;
             font-weight: 600;
             margin: 0.83em 0;
-            color: #333;
+            color: #1e293b;
         }
 
         .markdown-body h3 {
             font-size: 1.25em;
             font-weight: 600;
             margin: 1em 0;
-            color: #444;
+            color: #334155;
         }
 
         .markdown-body h4 {
             font-size: 1.1em;
             font-weight: 600;
             margin: 1em 0;
-            color: #555;
+            color: #475569;
         }
 
         .markdown-body p {
             margin-bottom: 1em;
-            color: #444;
+            color: #475569;
             overflow-wrap: break-word;
-            word-wrap: break-word;
         }
 
         .markdown-body strong {
-            font-weight: 700;
-            color: #1a1a1a;
+            font-weight: 600;
+            color: #1e293b;
         }
 
         .markdown-body em {
             font-style: italic;
         }
 
-        /* Plain bullet points */
+        /* ----- Lists ----- */
         .markdown-body ul, .markdown-body ol {
             margin-bottom: 1em;
             padding-left: 2em;
@@ -225,27 +217,28 @@
 
         .markdown-body li {
             margin-bottom: 0.25em;
-            color: #444;
+            color: #475569;
         }
 
+        /* ----- Links ----- */
         .markdown-body a {
-            color: #0066cc;
-            text-decoration: underline;
+            color: #2563eb;
+            text-decoration: none;
         }
 
         .markdown-body a:hover {
-            color: #004499;
+            text-decoration: underline;
         }
 
-        /* Inline code with proper RTL isolation */
+        /* ----- Inline Code ----- 
+           Uses unicode-bidi: isolate to prevent RTL text from affecting code direction */
         .markdown-body code:not([class*="language-"]) {
-            background: #f4f4f4;
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
+            background: #f1f5f9;
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9em;
-            color: #333;
-            border: 1px solid #ddd;
+            font-size: 0.875em;
+            color: #0f172a;
             unicode-bidi: isolate;
             direction: ltr;
             display: inline-block;
@@ -253,13 +246,12 @@
             white-space: nowrap;
         }
 
-        /* Code blocks with horizontal scroll */
+        /* ----- Code Blocks ----- */
         .markdown-body pre {
             margin: 1em 0;
             border-radius: 8px;
             overflow-x: auto;
             overflow-y: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             direction: ltr !important;
             text-align: left !important;
             max-width: 100%;
@@ -267,7 +259,7 @@
 
         .markdown-body pre code {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9em;
+            font-size: 0.875em;
             line-height: 1.6;
             display: block;
             min-width: max-content;
@@ -275,24 +267,25 @@
             white-space: pre;
         }
 
+        /* ----- Blockquotes ----- */
         .markdown-body blockquote {
             margin: 1em 0;
             padding: 0.5em 1em;
-            background: #f9f9f9;
-            border-left: 4px solid #ddd;
-            color: #666;
-            font-style: italic;
+            background: #f8fafc;
+            border-left: 3px solid #cbd5e1;
+            color: #64748b;
             overflow-x: auto;
         }
 
+        /* ----- Horizontal Rules ----- */
         .markdown-body hr {
             border: none;
             height: 1px;
-            background: #ddd;
+            background: #e2e8f0;
             margin: 2em 0;
         }
 
-        /* Tables with horizontal scroll wrapper */
+        /* ----- Tables ----- */
         .markdown-body .table-wrapper {
             overflow-x: auto;
             margin: 1em 0;
@@ -302,26 +295,26 @@
             width: 100%;
             min-width: 400px;
             border-collapse: collapse;
-            overflow: hidden;
         }
 
         .markdown-body th, .markdown-body td {
             padding: 0.5em 1em;
-            border: 1px solid #ddd;
+            border: 1px solid #e2e8f0;
             text-align: left;
         }
 
         .markdown-body th {
-            background: #f5f5f5;
+            background: #f8fafc;
             font-weight: 600;
-            color: #333;
+            color: #334155;
         }
 
         .markdown-body td {
             background: white;
         }
 
-        /* Inline MathJax - NO scrollbars, proper alignment */
+        /* ----- MathJax Inline ----- 
+           Ensures inline math doesn't cause layout issues */
         mjx-container:not([display="true"]) {
             display: inline-block !important;
             overflow: visible !important;
@@ -331,14 +324,14 @@
             max-width: none !important;
         }
 
-        /* Block/display math styling */
+        /* ----- MathJax Block/Display ----- */
         mjx-container[display="true"] {
             display: block !important;
             margin: 1em auto !important;
             padding: 1em;
             background: #fffbeb;
             border-radius: 8px;
-            border: 1px solid #fde68a;
+            border: 1px solid #fef3c7;
             text-align: center !important;
             direction: ltr !important;
             overflow-x: auto;
@@ -346,18 +339,18 @@
             max-width: 100%;
         }
 
-        /* Fix for Persian/Arabic text in MathJax */
+        /* Allow Persian/Arabic text in MathJax to use proper font */
         mjx-mtext {
             font-family: 'Vazirmatn', 'Inter', sans-serif !important;
         }
 
-        /* Footnotes styling */
+        /* ----- Footnotes ----- */
         .markdown-body .footnotes {
             margin-top: 2em;
             padding-top: 1em;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #e2e8f0;
             font-size: 0.9em;
-            color: #666;
+            color: #64748b;
         }
 
         .markdown-body .footnotes ol {
@@ -381,7 +374,7 @@
 
         .markdown-body .footnote-ref a {
             text-decoration: none;
-            color: #6366f1;
+            color: #2563eb;
             padding: 0 2px;
         }
 
@@ -394,225 +387,151 @@
             margin-left: 0.5em;
         }
 
-        /* BDI elements for isolated Latin text in RTL */
+        /* ----- BDI Elements -----
+           Used to isolate Latin text sequences in RTL content */
         .markdown-body bdi {
             unicode-bidi: isolate;
         }
 
-        /* Custom scrollbar */
+        /* ----- Scrollbar Styling ----- */
         ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
-            border-radius: 5px;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
-            border-radius: 5px;
-            border: 2px solid #f1f5f9;
+            background: #94a3b8;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            background: #64748b;
         }
 
-        /* Scrollbar for dark elements */
+        /* Dark scrollbar for editor and code blocks */
         .editor-textarea::-webkit-scrollbar-track,
         pre::-webkit-scrollbar-track {
-            background: #313244;
+            background: #334155;
         }
 
         .editor-textarea::-webkit-scrollbar-thumb,
         pre::-webkit-scrollbar-thumb {
-            background: #585b70;
-            border: 2px solid #313244;
+            background: #64748b;
         }
 
-        /* Window controls */
-        .window-controls {
+        /* ----- Panel Header ----- */
+        .panel-header {
             display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-            background: #1e1e2e;
-            border-bottom: 1px solid #313244;
+            gap: 6px;
+            padding: 10px 14px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
         }
 
-        .window-dot {
-            width: 12px;
-            height: 12px;
+        .panel-dot {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            transition: transform 0.2s ease;
         }
 
-        .window-dot:hover {
-            transform: scale(1.2);
-        }
+        .panel-dot.red { background: #f87171; }
+        .panel-dot.yellow { background: #fbbf24; }
+        .panel-dot.green { background: #4ade80; }
 
-        .window-dot.red { background: #f38ba8; }
-        .window-dot.yellow { background: #f9e2af; }
-        .window-dot.green { background: #a6e3a1; }
-
-        /* Direction indicator */
-        .direction-badge {
+        /* ----- Status Badge ----- */
+        .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-        }
-
-        .direction-badge.mixed {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-            color: #4338ca;
-        }
-
-        .direction-badge.rtl {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
-        }
-
-        .direction-badge.ltr {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
-        }
-
-        /* Stats bar */
-        .stats-bar {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
             gap: 4px;
-        }
-
-        /* Pulse animation for live indicator */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .live-indicator {
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        /* Direction stats */
-        .direction-stats {
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-        }
-
-        .direction-stats span {
             padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
         }
 
-        .direction-stats .rtl-count {
+        .status-badge.mixed {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .status-badge.rtl {
             background: #fef3c7;
             color: #92400e;
         }
 
-        .direction-stats .ltr-count {
+        .status-badge.ltr {
             background: #dbeafe;
             color: #1e40af;
+        }
+
+        /* ----- Stats Display ----- */
+        .stats-text {
+            font-size: 12px;
+            color: #64748b;
         }
     </style>
 </head>
 <body class="min-h-screen">
-    <!-- Header -->
-    <header class="header-gradient text-white py-8 shadow-2xl relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="flex items-center justify-center gap-4">
-                <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
+
+    <!-- =============================================
+         HEADER
+         ============================================= -->
+    <header class="bg-white border-b border-slate-200 py-4">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-slate-100 rounded-lg">
+                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold text-slate-800">Markdown Previewer</h1>
+                        <p class="text-xs text-slate-500">MathJax • Syntax Highlighting • Smart RTL</p>
+                    </div>
                 </div>
-                <div class="text-center">
-                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Advanced Markdown Previewer</h1>
-                    <p class="text-indigo-100 mt-2 text-lg">Real-time preview with MathJax, Syntax Highlighting & Smart Per-Block RTL</p>
+                <div class="flex items-center gap-4 text-xs text-slate-500">
+                    <span>📝 Markdown</span>
+                    <span>🔢 LaTeX</span>
+                    <span>🔄 RTL/LTR</span>
                 </div>
-            </div>
-            
-            <!-- Feature badges -->
-            <div class="flex flex-wrap justify-center gap-3 mt-6">
-                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">📝 Markdown</span>
-                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🔢 MathJax</span>
-                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🎨 Syntax Highlight</span>
-                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">🔄 Per-Block RTL/LTR</span>
-                <span class="px-3 py-1 bg-white/20 rounded-full text-sm backdrop-blur-sm">📌 Footnotes</span>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-10">
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+    <!-- =============================================
+         MAIN CONTENT - Editor and Preview Panels
+         ============================================= -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            
             <!-- Editor Panel -->
             <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
-                        <h2 class="text-lg font-semibold text-slate-700">Markdown Editor</h2>
-                    </div>
-                    <div class="stats-bar" id="stats">
-                        <span class="stat-item">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <span id="word-count">0 words</span>
-                        </span>
-                        <span class="stat-item">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
-                            <span id="char-count">0 chars</span>
-                        </span>
+                <!-- Panel Title Bar -->
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-slate-600">Editor</span>
+                    <div class="stats-text" id="stats">
+                        <span id="word-count">0 words</span> · <span id="char-count">0 chars</span>
                     </div>
                 </div>
                 
-                <div class="glass-card overflow-hidden flex-1 flex flex-col">
-                    <div class="window-controls">
-                        <div class="window-dot red"></div>
-                        <div class="window-dot yellow"></div>
-                        <div class="window-dot green"></div>
-                        <span class="text-slate-400 text-sm ml-4 font-mono">document.md</span>
-                        <div class="ml-auto flex items-center gap-2">
-                            <span class="live-indicator flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
-                                <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
-                                LIVE
-                            </span>
-                        </div>
+                <!-- Editor Card -->
+                <div class="card overflow-hidden flex-1 flex flex-col">
+                    <div class="panel-header">
+                        <div class="panel-dot red"></div>
+                        <div class="panel-dot yellow"></div>
+                        <div class="panel-dot green"></div>
+                        <span class="text-slate-400 text-xs ml-3 font-mono">document.md</span>
                     </div>
                     <textarea 
                         id="markdown-input" 
-                        class="editor-textarea w-full flex-1 p-5 min-h-[600px]"
-                        placeholder="Start typing your Markdown here...
-
-# Supports
-- **Bold** and *italic* text
-- Math: $E = mc^2$ or $$\int_0^\infty f(x)dx$$
-- Code blocks with syntax highlighting
-- Per-block RTL/LTR detection
-- Footnotes[^1]
-
-[^1]: This is a footnote!"
+                        class="editor-textarea w-full flex-1 p-4 min-h-[550px]"
+                        placeholder="Start typing Markdown here..."
                         spellcheck="false"
                     ></textarea>
                 </div>
@@ -620,148 +539,57 @@
 
             <!-- Preview Panel -->
             <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-                        <h2 class="text-lg font-semibold text-slate-700">Live Preview</h2>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="direction-stats" id="direction-stats">
-                            <span class="rtl-count">RTL: 0</span>
-                            <span class="ltr-count">LTR: 0</span>
-                        </div>
+                <!-- Panel Title Bar -->
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-slate-600">Preview</span>
+                    <div class="flex items-center gap-2">
+                        <span class="stats-text" id="direction-stats">RTL: 0 · LTR: 0</span>
                         <div id="direction-indicator">
-                            <span class="direction-badge ltr">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                                PER-BLOCK
-                            </span>
+                            <span class="status-badge ltr">LTR</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="glass-card overflow-hidden flex-1 flex flex-col">
-                    <div class="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                <!-- Preview Card -->
+                <div class="card overflow-hidden flex-1 flex flex-col">
+                    <div class="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
                         <div class="flex gap-1.5">
-                            <div class="w-3 h-3 rounded-full bg-rose-400"></div>
-                            <div class="w-3 h-3 rounded-full bg-amber-400"></div>
-                            <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                         </div>
-                        <span class="text-slate-500 text-sm ml-2 font-mono">preview.html</span>
+                        <span class="text-slate-400 text-xs ml-2 font-mono">preview.html</span>
                     </div>
                     <div 
                         id="markdown-output" 
-                        class="markdown-body preview-container p-8 min-h-[600px] flex-1"
+                        class="markdown-body preview-container p-6 min-h-[550px] flex-1"
                     >
                         <p class="text-slate-400 text-center italic">Your preview will appear here...</p>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Quick Reference Cards -->
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-            <!-- Markdown Reference -->
-            <div class="glass-card p-6">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                    <span class="p-2 bg-indigo-100 rounded-lg">📝</span>
-                    Markdown Syntax
-                </h3>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-indigo-600 font-mono"># Heading</code>
-                        <span class="text-slate-500">Header</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-indigo-600 font-mono">**bold**</code>
-                        <span class="text-slate-500">Bold text</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-indigo-600 font-mono">*italic*</code>
-                        <span class="text-slate-500">Italic text</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-indigo-600 font-mono">`code`</code>
-                        <span class="text-slate-500">Inline code</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Math Reference -->
-            <div class="glass-card p-6">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                    <span class="p-2 bg-purple-100 rounded-lg">🔢</span>
-                    Math (LaTeX)
-                </h3>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-purple-600 font-mono">$E=mc^2$</code>
-                        <span class="text-slate-500">Inline</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-purple-600 font-mono">$$\sum_{i=1}^n$$</code>
-                        <span class="text-slate-500">Block</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-purple-600 font-mono">\color{red}{x}</code>
-                        <span class="text-slate-500">Colors</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-                        <code class="text-purple-600 font-mono">\text{فارسی}</code>
-                        <span class="text-slate-500">Persian</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footnotes Reference -->
-            <div class="glass-card p-6">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                    <span class="p-2 bg-amber-100 rounded-lg">📌</span>
-                    Footnotes
-                </h3>
-                <div class="space-y-3 text-sm">
-                    <div class="p-2 bg-slate-50 rounded-lg">
-                        <code class="text-amber-600 font-mono block">Text[^1]</code>
-                        <span class="text-slate-500 text-xs">Reference</span>
-                    </div>
-                    <div class="p-2 bg-slate-50 rounded-lg">
-                        <code class="text-amber-600 font-mono block">[^1]: Note text</code>
-                        <span class="text-slate-500 text-xs">Definition</span>
-                    </div>
-                    <p class="text-slate-500 text-xs mt-2">
-                        Footnotes appear at the bottom of the preview.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Code Reference -->
-            <div class="glass-card p-6">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                    <span class="p-2 bg-emerald-100 rounded-lg">💻</span>
-                    Code Blocks
-                </h3>
-                <div class="space-y-3 text-sm">
-                    <div class="p-2 bg-slate-50 rounded-lg">
-                        <code class="text-emerald-600 font-mono block">```javascript</code>
-                        <code class="text-slate-500 font-mono block pl-2">// your code</code>
-                        <code class="text-emerald-600 font-mono block">```</code>
-                    </div>
-                    <p class="text-slate-500 text-xs mt-2">
-                        Supports: JavaScript, Python, TypeScript, CSS, HTML, JSON, Bash, and many more...
-                    </p>
-                </div>
-            </div>
-        </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="text-center py-6 text-slate-500 text-sm border-t border-slate-200 bg-white/50">
-        <p>Built with ❤️ using Marked.js, MathJax, and Prism.js</p>
+    <!-- =============================================
+         FOOTER
+         ============================================= -->
+    <footer class="text-center py-4 text-slate-400 text-xs border-t border-slate-100">
+        <p>Marked.js · MathJax · Prism.js</p>
     </footer>
 
+    <!-- =============================================
+         JAVASCRIPT
+         ============================================= -->
     <script>
-        // Helper function to escape HTML
+        // =============================================
+        // UTILITY FUNCTIONS
+        // =============================================
+        
+        /**
+         * Escapes HTML special characters to prevent XSS attacks
+         * Used when rendering user-provided content
+         */
         function escapeHtml(text) {
             return text
                 .replace(/&/g, '&amp;')
@@ -770,20 +598,46 @@
                 .replace(/"/g, '&quot;');
         }
 
-        // ============================================
+        /**
+         * Creates a debounced version of a function
+         * Prevents excessive calls during rapid input
+         * @param {Function} func - Function to debounce
+         * @param {number} wait - Milliseconds to wait before executing
+         */
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // =============================================
         // FOOTNOTE EXTENSION FOR MARKED.JS
-        // ============================================
+        // Implements GitHub-style footnotes: [^1] and [^1]: definition
+        // =============================================
         
+        /**
+         * Storage for footnote data during parsing
+         * Must be reset before each parse to avoid data leakage
+         */
         const footnoteStorage = {
-            footnotes: {},
-            footnoteRefs: [],
+            footnotes: {},      // Map of footnote ID to content
+            footnoteRefs: [],   // Ordered list of referenced footnote IDs
             reset() {
                 this.footnotes = {};
                 this.footnoteRefs = [];
             }
         };
 
-        // Extension to handle footnote references [^1]
+        /**
+         * Marked.js extension for footnote references [^1]
+         * Captures references in the text and creates superscript links
+         */
         const footnoteRefExtension = {
             name: 'footnoteRef',
             level: 'inline',
@@ -791,9 +645,11 @@
                 return src.match(/\[\^/)?.index;
             },
             tokenizer(src) {
+                // Match [^id] but NOT [^id]: (which is a definition)
                 const match = /^\[\^([^\]]+)\](?!\:)/.exec(src);
                 if (match) {
                     const id = match[1].trim();
+                    // Track reference order for numbering
                     if (!footnoteStorage.footnoteRefs.includes(id)) {
                         footnoteStorage.footnoteRefs.push(id);
                     }
@@ -810,7 +666,10 @@
             }
         };
 
-        // Extension to handle footnote definitions [^1]: text
+        /**
+         * Marked.js extension for footnote definitions [^1]: text
+         * Captures definitions and stores them for later rendering
+         */
         const footnoteDefExtension = {
             name: 'footnoteDef',
             level: 'block',
@@ -822,6 +681,7 @@
                 if (match) {
                     const id = match[1].trim();
                     const content = match[2].trim();
+                    // Store definition for later use
                     footnoteStorage.footnotes[id] = content;
                     return {
                         type: 'footnoteDef',
@@ -832,11 +692,15 @@
                 }
             },
             renderer(token) {
+                // Don't render anything inline - footnotes appear at the bottom
                 return '';
             }
         };
 
-        // Function to append footnotes section
+        /**
+         * Generates the footnotes section HTML
+         * Called after main content parsing to append footnotes at the bottom
+         */
         function appendFootnotesSection(html) {
             const ids = footnoteStorage.footnoteRefs;
             if (ids.length === 0) return html;
@@ -852,21 +716,28 @@
             return html + footnotesHtml;
         }
 
-        // Configure marked.js with custom renderer and footnote extensions
+        // =============================================
+        // MARKED.JS CONFIGURATION
+        // =============================================
+        
         marked.use({
-            breaks: true,
-            gfm: true,
+            breaks: true,   // Convert single line breaks to <br>
+            gfm: true,      // Enable GitHub Flavored Markdown
             extensions: [footnoteRefExtension, footnoteDefExtension],
             renderer: {
+                /**
+                 * Custom code block renderer with Prism.js syntax highlighting
+                 */
                 code({text, lang, escaped}) {
                     const langClass = lang ? escapeHtml(lang.split(/\s/)[0]) : 'plaintext';
                     let highlighted;
             
+                    // Use Prism if language is supported
                     if (lang && Prism.languages[lang]) {
                         try {
                             highlighted = Prism.highlight(text, Prism.languages[lang], lang);
                         } catch (e) {
-                            console.error(e);
+                            console.error('Prism highlighting error:', e);
                             highlighted = escaped ? text : escapeHtml(text);
                         }
                     } else {
@@ -878,13 +749,19 @@
             }
         });
 
-        // Wrap tables with scrollable container after parsing
+        /**
+         * Wraps tables in scrollable containers for responsive display
+         */
         function wrapTables(html) {
-            return html.replace(/<table>/g, '<div class="table-wrapper"><table>')
-                       .replace(/<\/table>/g, '</table></div>');
+            return html
+                .replace(/<table>/g, '<div class="table-wrapper"><table>')
+                .replace(/<\/table>/g, '</table></div>');
         }
         
-        // DOM elements
+        // =============================================
+        // DOM ELEMENT REFERENCES
+        // =============================================
+        
         const markdownInput = document.getElementById('markdown-input');
         const markdownOutput = document.getElementById('markdown-output');
         const directionIndicator = document.getElementById('direction-indicator');
@@ -892,21 +769,30 @@
         const wordCountEl = document.getElementById('word-count');
         const charCountEl = document.getElementById('char-count');
 
-        // Persian/Arabic Unicode ranges
+        // =============================================
+        // RTL/LTR DIRECTION DETECTION
+        // =============================================
+
+        // Unicode ranges for Persian/Arabic characters
         const PERSIAN_ARABIC_PATTERN = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g;
-        // Latin characters pattern (including extended Latin)
+        
+        // Unicode ranges for Latin characters (including extended Latin)
         const LATIN_PATTERN = /[A-Za-z\u00C0-\u024F]/g;
 
-        // Count Persian vs Latin characters in text
+        /**
+         * Counts Persian/Arabic vs Latin characters in text
+         * Strips out code, math, URLs, and punctuation before counting
+         */
         function countCharacterTypes(text) {
+            // Remove content that shouldn't affect direction detection
             const cleanText = text
-                .replace(/<[^>]*>/g, '')
-                .replace(/\$\$[\s\S]*?\$\$/g, '')
-                .replace(/\$[^$]+\$/g, '')
-                .replace(/`[^`]+`/g, '')
-                .replace(/```[\s\S]*?```/g, '')
-                .replace(/https?:\/\/[^\s]+/g, '')
-                .replace(/[0-9\s\p{P}\p{S}]/gu, '');
+                .replace(/<[^>]*>/g, '')              // HTML tags
+                .replace(/\$\$[\s\S]*?\$\$/g, '')     // Block math
+                .replace(/\$[^$]+\$/g, '')            // Inline math
+                .replace(/`[^`]+`/g, '')              // Inline code
+                .replace(/```[\s\S]*?```/g, '')       // Code blocks
+                .replace(/https?:\/\/[^\s]+/g, '')    // URLs
+                .replace(/[0-9\s\p{P}\p{S}]/gu, '');  // Numbers, spaces, punctuation
             
             const persianMatches = cleanText.match(PERSIAN_ARABIC_PATTERN) || [];
             const latinMatches = cleanText.match(LATIN_PATTERN) || [];
@@ -917,10 +803,14 @@
             };
         }
 
-        // Determine direction based on majority character type
+        /**
+         * Determines text direction based on character majority
+         * Returns 'rtl' if Persian/Arabic characters dominate, otherwise 'ltr'
+         */
         function getElementDirection(text) {
             const counts = countCharacterTypes(text);
             
+            // Default to LTR if no significant characters found
             if (counts.persian === 0 && counts.latin === 0) {
                 return 'ltr';
             }
@@ -928,16 +818,21 @@
             return counts.persian > counts.latin ? 'rtl' : 'ltr';
         }
 
-        // Apply direction to each block element
+        /**
+         * Applies direction attribute to each block element individually
+         * This allows mixed RTL/LTR content to display correctly
+         */
         function applyPerBlockDirection(container) {
             let rtlCount = 0;
             let ltrCount = 0;
             
+            // Block elements that should have direction applied
             const blockSelectors = [
                 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                 'li', 'blockquote', 'th', 'td'
             ];
             
+            // Apply direction to list containers
             const lists = container.querySelectorAll('ul, ol');
             lists.forEach(list => {
                 const listText = list.textContent || '';
@@ -946,9 +841,11 @@
                 if (direction === 'rtl') rtlCount++; else ltrCount++;
             });
             
+            // Apply direction to each block element
             blockSelectors.forEach(selector => {
                 const elements = container.querySelectorAll(selector);
                 elements.forEach(el => {
+                    // Skip elements inside code blocks
                     if (el.closest('pre') || el.closest('code')) {
                         return;
                     }
@@ -969,27 +866,38 @@
             return { rtlCount, ltrCount };
         }
 
-        // ============================================
-        // BIDI TEXT ISOLATION - Fix for mixed RTL/LTR
-        // ============================================
+        // =============================================
+        // BIDIRECTIONAL TEXT ISOLATION
+        // Fixes display issues when Latin text appears within RTL content
+        // =============================================
         
-        // Isolate Latin character sequences within RTL elements using <bdi> tags
-        // This must run AFTER MathJax has rendered to avoid breaking math
+        /**
+         * Isolates Latin character sequences within RTL elements using <bdi> tags
+         * 
+         * Problem: When Latin text like "C++" or "my name is amin" appears in RTL context,
+         * browsers may incorrectly reverse the character/word order.
+         * 
+         * Solution: Wrap Latin sequences in <bdi> (bidirectional isolate) elements
+         * which prevents the RTL context from affecting their display order.
+         * 
+         * IMPORTANT: Must run AFTER MathJax rendering to avoid breaking math elements
+         */
         function isolateLatinInRTL(container) {
             const rtlElements = container.querySelectorAll('[dir="rtl"]');
             
             rtlElements.forEach(el => {
-                // Skip code elements
+                // Skip code elements - they handle their own direction
                 if (el.tagName === 'PRE' || el.tagName === 'CODE') return;
                 if (el.closest('pre') || el.closest('code')) return;
                 
-                // Collect all text nodes first (avoid modifying while iterating)
+                // Collect all text nodes (avoid modifying DOM while iterating)
                 const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
                 const textNodes = [];
                 let currentNode;
+                
                 while (currentNode = walker.nextNode()) {
-                    // Skip text inside code, pre, bdi, or MathJax elements
                     const parent = currentNode.parentElement;
+                    // Skip text inside elements that shouldn't be processed
                     if (parent && !parent.closest('code, pre, bdi, mjx-container, mjx-math, mjx-mrow, mjx-mi, mjx-mo, mjx-mn, mjx-mtext, mjx-msup, mjx-msub, mjx-mfrac, mjx-msqrt, mjx-mroot, mjx-mtable, mjx-mtr, mjx-mtd, script, style')) {
                         textNodes.push(currentNode);
                     }
@@ -999,11 +907,19 @@
                 textNodes.forEach(textNode => {
                     const text = textNode.textContent;
                     
-                    // Match Latin letter sequences (including those with numbers)
+                    /**
+                     * Regex explanation:
+                     * - [^\s\u0600-\u06FF...]* - Optional non-RTL, non-space chars before (like ++, @, etc.)
+                     * - [A-Za-z] - At least one Latin letter (required)
+                     * - [^\s\u0600-\u06FF...]* - Optional non-RTL, non-space chars after
+                     * - (?:\s+...)* - Optionally repeat for multiple words separated by spaces
+                     * 
+                     * This captures: "C++", "++C", "@user", "my name is amin", "C++ programming"
+                     */
                     const regex = /[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*(?:\s+[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*)*/g;
                     
                     if (!regex.test(text)) return;
-                    regex.lastIndex = 0;
+                    regex.lastIndex = 0;  // Reset regex state
                     
                     const fragment = document.createDocumentFragment();
                     let lastIndex = 0;
@@ -1013,7 +929,7 @@
                     while ((match = regex.exec(text)) !== null) {
                         hasMatches = true;
                         
-                        // Add text before the match
+                        // Add text before the match (Persian text)
                         if (match.index > lastIndex) {
                             fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
                         }
@@ -1021,21 +937,25 @@
                         let matchedText = match[0];
                         let trailingPunct = '';
                         
-                        // Strip trailing sentence punctuation (should stay outside the isolated block)
+                        /**
+                         * Strip trailing sentence punctuation from the isolated block
+                         * Punctuation like . ! ? , should stay in RTL context for proper placement
+                         * Example: "test." should become <bdi>test</bdi>. not <bdi>test.</bdi>
+                         */
                         const trailingMatch = matchedText.match(/[.!?,;:]+$/);
                         if (trailingMatch) {
                             trailingPunct = trailingMatch[0];
                             matchedText = matchedText.slice(0, -trailingPunct.length);
                         }
                         
-                        // Wrap Latin sequence in <bdi> for isolation (if content remains)
+                        // Wrap Latin sequence in <bdi> for bidirectional isolation
                         if (matchedText) {
                             const bdi = document.createElement('bdi');
                             bdi.textContent = matchedText;
                             fragment.appendChild(bdi);
                         }
                         
-                        // Add trailing punctuation outside the isolation
+                        // Add punctuation outside the isolation (stays in RTL context)
                         if (trailingPunct) {
                             fragment.appendChild(document.createTextNode(trailingPunct));
                         }
@@ -1048,7 +968,7 @@
                         fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
                     }
                     
-                    // Replace the text node with the fragment if we made changes
+                    // Replace original text node with processed fragment
                     if (hasMatches && textNode.parentNode) {
                         textNode.parentNode.replaceChild(fragment, textNode);
                     }
@@ -1056,64 +976,65 @@
             });
         }
 
-        // Update direction indicator UI
+        // =============================================
+        // UI UPDATE FUNCTIONS
+        // =============================================
+
+        /**
+         * Updates the direction indicator badge in the UI
+         */
         function updateDirectionIndicator(rtlCount, ltrCount) {
             const total = rtlCount + ltrCount;
-            let badgeClass, label, iconPath;
+            let badgeClass, label;
             
             if (total === 0) {
                 badgeClass = 'ltr';
                 label = 'LTR';
-                iconPath = 'M14 5l7 7m0 0l-7 7m7-7H3';
             } else if (rtlCount > 0 && ltrCount > 0) {
                 badgeClass = 'mixed';
-                label = 'MIXED';
-                iconPath = 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4';
+                label = 'Mixed';
             } else if (rtlCount > ltrCount) {
                 badgeClass = 'rtl';
                 label = 'RTL';
-                iconPath = 'M10 19l-7-7m0 0l7-7m-7 7h18';
             } else {
                 badgeClass = 'ltr';
                 label = 'LTR';
-                iconPath = 'M14 5l7 7m0 0l-7 7m7-7H3';
             }
             
-            directionIndicator.innerHTML = `
-                <span class="direction-badge ${badgeClass}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"></path>
-                    </svg>
-                    ${label}
-                </span>
-            `;
-            
-            directionStats.innerHTML = `
-                <span class="rtl-count">RTL: ${rtlCount}</span>
-                <span class="ltr-count">LTR: ${ltrCount}</span>
-            `;
+            directionIndicator.innerHTML = `<span class="status-badge ${badgeClass}">${label}</span>`;
+            directionStats.textContent = `RTL: ${rtlCount} · LTR: ${ltrCount}`;
         }
 
-        // Update word and character count
+        /**
+         * Updates word and character count display
+         */
         function updateStats(text) {
             const chars = text.length;
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-            wordCountEl.textContent = `${words} word${words !== 1 ? 's' : ''}`;
-            charCountEl.textContent = `${chars} char${chars !== 1 ? 's' : ''}`;
+            wordCountEl.textContent = `${words} words`;
+            charCountEl.textContent = `${chars} chars`;
         }
 
-        // Escape math expressions before markdown parsing
+        // =============================================
+        // MATH EXPRESSION HANDLING
+        // Protects math from being processed by Markdown parser
+        // =============================================
+
+        /**
+         * Temporarily replaces math expressions with placeholders
+         * This prevents Markdown parser from corrupting LaTeX syntax
+         */
         function escapeMath(text) {
             const mathBlocks = [];
             const inlineMaths = [];
             
-            // Escape block math $$...$$ (including multiline)
+            // Escape block math $$...$$ (can be multiline)
             text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
                 mathBlocks.push(match);
                 return `%%MATHBLOCK${mathBlocks.length - 1}%%`;
             });
             
-            // Escape inline math $...$
+            // Escape inline math $...$ (single line only)
             text = text.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
                 inlineMaths.push(match);
                 return `%%MATHINLINE${inlineMaths.length - 1}%%`;
@@ -1122,7 +1043,9 @@
             return { text, mathBlocks, inlineMaths };
         }
 
-        // Restore math expressions after markdown parsing
+        /**
+         * Restores math expressions after Markdown parsing
+         */
         function restoreMath(html, mathBlocks, inlineMaths) {
             mathBlocks.forEach((math, i) => {
                 html = html.replace(`%%MATHBLOCK${i}%%`, math);
@@ -1135,403 +1058,178 @@
             return html;
         }
 
-        // Main update function
+        // =============================================
+        // MAIN UPDATE FUNCTION
+        // Orchestrates the entire preview rendering pipeline
+        // =============================================
+
         function updatePreview() {
             const rawMarkdown = markdownInput.value;
             
+            // Update statistics
             updateStats(rawMarkdown);
             
+            // Handle empty input
             if (rawMarkdown.trim() === '') {
                 markdownOutput.innerHTML = '<p class="text-slate-400 text-center italic">Your preview will appear here...</p>';
                 updateDirectionIndicator(0, 0);
                 return;
             }
             
+            // Reset footnote storage for fresh parse
             footnoteStorage.reset();
             
+            // Step 1: Protect math expressions from Markdown parser
             const { text, mathBlocks, inlineMaths } = escapeMath(rawMarkdown);
             
+            // Step 2: Parse Markdown to HTML
             let html = marked.parse(text);
             
+            // Step 3: Restore math expressions
             html = restoreMath(html, mathBlocks, inlineMaths);
             
+            // Step 4: Wrap tables for responsive scrolling
             html = wrapTables(html);
             
+            // Step 5: Add footnotes section at the bottom
             html = appendFootnotesSection(html);
             
+            // Step 6: Render to DOM
             markdownOutput.innerHTML = html;
             
-            // Apply per-block direction
+            // Step 7: Apply per-block RTL/LTR direction
             const directionCounts = applyPerBlockDirection(markdownOutput);
-            
             updateDirectionIndicator(directionCounts.rtlCount, directionCounts.ltrCount);
             
+            // Step 8: Apply syntax highlighting to code blocks
             Prism.highlightAllUnder(markdownOutput);
             
-            // Process MathJax first, then apply bidi isolation
+            // Step 9: Render math with MathJax, then fix bidirectional text
             if (window.MathJax && window.MathJax.typesetPromise) {
                 MathJax.typesetClear([markdownOutput]);
-                MathJax.typesetPromise([markdownOutput]).then(() => {
-                    // Isolate Latin characters AFTER MathJax has rendered
-                    isolateLatinInRTL(markdownOutput);
-                }).catch((err) => {
-                    console.error('MathJax error:', err);
-                    // Still try to isolate Latin even if MathJax fails
-                    isolateLatinInRTL(markdownOutput);
-                });
+                MathJax.typesetPromise([markdownOutput])
+                    .then(() => {
+                        // Must run AFTER MathJax to avoid breaking math elements
+                        isolateLatinInRTL(markdownOutput);
+                    })
+                    .catch((err) => {
+                        console.error('MathJax error:', err);
+                        // Still try to fix bidi even if MathJax fails
+                        isolateLatinInRTL(markdownOutput);
+                    });
             } else {
-                // If MathJax not available, just isolate Latin
+                // MathJax not available, just fix bidi
                 isolateLatinInRTL(markdownOutput);
             }
         }
 
-        // Debounce function for performance
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
+        // =============================================
+        // EVENT LISTENERS
+        // =============================================
 
-        // Event listeners
+        // Debounce input to prevent excessive re-renders during fast typing
         const debouncedUpdate = debounce(updatePreview, 150);
         markdownInput.addEventListener('input', debouncedUpdate);
+
+        // Handle paste events with immediate update
         markdownInput.addEventListener('paste', () => setTimeout(updatePreview, 0));
 
-        // Sample content - More diverse examples
-        const sampleMarkdown = `# 🚀 Advanced Markdown Previewer
+        // =============================================
+        // SAMPLE CONTENT
+        // Demonstrates various features of the previewer
+        // =============================================
 
-Welcome to this **powerful** Markdown editor with *real-time preview*, LaTeX math support, syntax highlighting, and **smart per-block RTL detection**.
+        const sampleMarkdown = `# Markdown Previewer
+
+A **powerful** editor with *real-time preview*, LaTeX math, syntax highlighting, and **smart RTL detection**.
 
 ---
 
-## 📐 Mathematics Showcase
+## Math Examples
 
-### Basic Equations
+Inline math: $E = mc^2$ and $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
 
-The famous mass-energy equivalence: $E = mc^2$
-
-Euler's identity: $e^{i\\pi} + 1 = 0$
-
-Quadratic formula: $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
-
-### Colorful Math
-
-Colors in formulas: $\\color{red}{a^2} + \\color{blue}{b^2} = \\color{green}{c^2}$
-
-Gradient-like: $\\color{purple}{\\nabla} \\cdot \\color{orange}{\\vec{E}} = \\frac{\\color{red}{\\rho}}{\\color{blue}{\\varepsilon_0}}$
-
-### Block Equations
-
-The Gaussian integral:
+Block equation:
 
 $$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
 
-Maxwell's equations in differential form:
+---
+
+## بخش فارسی
+
+معادلۀ انیشتین $E = mc^2$ فیزیک را متحول کرد.
 
 $$\\nabla \\times \\vec{E} = -\\frac{\\partial \\vec{B}}{\\partial t}$$
 
-Schrödinger equation:
-
-$$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$$
-
-### Matrix Example
-
-$$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} ax + by \\\\ cx + dy \\end{pmatrix}$$
-
----
-
-## 🇮🇷 بخش فارسی
-
-### ریاضیات به فارسی
-
-معادله انیشتین $E = mc^2$ فیزیک را متحول کرد.
-
-فرمول انتگرال گاوسی به صورت زیر است:
-
-$$\\int_{-\\infty}^{+\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
-
-### متن فارسی با فرمول رنگی
-
-در این معادله $\\color{red}{x}$ مجهول و $\\color{blue}{a}$ و $\\color{green}{b}$ ثابت هستند.
-
-### فرمول با متن فارسی داخل آن
-
-برای نوشتن فارسی در فرمول از دستور text استفاده کنید:
-
-$$F = m \\cdot a \\quad \\text{(قانون دوم نیوتون)}$$
-
-$$E = \\frac{1}{2}mv^2 \\quad \\text{انرژی جنبشی}$$
-
 ### کد در متن فارسی
 
-در این خط چند کد \`first\` و \`second\` و \`third\` وجود دارد.
+برای اجرای برنامه از \`npm start\` استفاده کنید.
 
-برای اجرای برنامه از دستور \`npm start\` و یا \`yarn dev\` استفاده کنید.
-
-توابع مهم جاوااسکریپت: \`console.log()\` و \`document.getElementById()\` و \`addEventListener()\`
-
-### تست ترتیب حروف لاتین
-
-این شامل موارد A، B و C است.
-
-گزینه‌های X، Y و Z را بررسی کنید.
+زبان‌های برنامه‌نویسی مثل C++ و Python و JavaScript محبوب هستند.
 
 ---
 
-## 💻 Code Examples
-
-### JavaScript - Async/Await
+## Code Examples
 
 \`\`\`javascript
-// Fetch data with async/await
-async function fetchUserData(userId) {
-    try {
-        const response = await fetch(\`/api/users/\${userId}\`);
-        if (!response.ok) throw new Error('User not found');
-        
-        const user = await response.json();
-        console.log(\`Welcome, \${user.name}!\`);
-        return user;
-    } catch (error) {
-        console.error('Failed to fetch user:', error.message);
-        throw error;
-    }
+async function fetchData(url) {
+    const response = await fetch(url);
+    return response.json();
 }
-
-// Usage with Promise.all
-const users = await Promise.all([
-    fetchUserData(1),
-    fetchUserData(2),
-    fetchUserData(3)
-]);
 \`\`\`
-
-### Python - Data Science
 
 \`\`\`python
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-
-# Load and prepare data
-df = pd.read_csv('data.csv')
-X = df.drop('target', axis=1)
-y = df['target']
-
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-# Train model
-model = RandomForestClassifier(n_estimators=100)
-model.fit(X_train, y_train)
-
-# Evaluate
-accuracy = model.score(X_test, y_test)
-print(f"Model accuracy: {accuracy:.2%}")
-\`\`\`
-
-### TypeScript - Generic Types
-
-\`\`\`typescript
-interface Repository<T> {
-    find(id: string): Promise<T | null>;
-    save(entity: T): Promise<T>;
-    delete(id: string): Promise<boolean>;
-}
-
-class UserRepository implements Repository<User> {
-    private users: Map<string, User> = new Map();
-    
-    async find(id: string): Promise<User | null> {
-        return this.users.get(id) ?? null;
-    }
-    
-    async save(user: User): Promise<User> {
-        this.users.set(user.id, user);
-        return user;
-    }
-    
-    async delete(id: string): Promise<boolean> {
-        return this.users.delete(id);
-    }
-}
-\`\`\`
-
-### Rust - Ownership
-
-\`\`\`rust
-fn main() {
-    let s1 = String::from("hello");
-    let s2 = s1.clone(); // Deep copy
-    
-    println!("s1 = {}, s2 = {}", s1, s2);
-    
-    // Ownership transfer
-    let s3 = s1; // s1 is now invalid
-    
-    // Borrowing
-    let len = calculate_length(&s3);
-    println!("Length of '{}' is {}", s3, len);
-}
-
-fn calculate_length(s: &String) -> usize {
-    s.len()
-}
-\`\`\`
-
-### SQL - Complex Query
-
-\`\`\`sql
-WITH monthly_sales AS (
-    SELECT 
-        DATE_TRUNC('month', order_date) AS month,
-        product_id,
-        SUM(quantity * unit_price) AS revenue
-    FROM orders
-    WHERE order_date >= '2024-01-01'
-    GROUP BY 1, 2
-)
-SELECT 
-    p.name AS product_name,
-    ms.month,
-    ms.revenue,
-    LAG(ms.revenue) OVER (
-        PARTITION BY ms.product_id 
-        ORDER BY ms.month
-    ) AS prev_month_revenue,
-    ROUND(
-        (ms.revenue - LAG(ms.revenue) OVER (
-            PARTITION BY ms.product_id 
-            ORDER BY ms.month
-        )) / LAG(ms.revenue) OVER (
-            PARTITION BY ms.product_id 
-            ORDER BY ms.month
-        ) * 100, 2
-    ) AS growth_percentage
-FROM monthly_sales ms
-JOIN products p ON p.id = ms.product_id
-ORDER BY p.name, ms.month;
-\`\`\`
-
-### CSS - Modern Layout
-
-\`\`\`css
-.container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    padding: clamp(1rem, 5vw, 3rem);
-}
-
-.card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 
-        0 10px 40px rgba(0, 0, 0, 0.1),
-        0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    
-    &:hover {
-        transform: translateY(-5px);
-        box-shadow: 
-            0 20px 60px rgba(0, 0, 0, 0.15),
-            0 5px 20px rgba(0, 0, 0, 0.1);
-    }
-}
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
 \`\`\`
 
 ---
 
-## 📝 Footnotes Example
+## Footnotes
 
-The theory of relativity[^1] changed our understanding of space and time. Quantum mechanics[^2] describes the behavior of particles at the atomic scale. The Standard Model[^3] explains fundamental forces.
+The theory of relativity[^1] changed physics forever.
 
-[^1]: Albert Einstein published his theory of special relativity in 1905.
-[^2]: Developed in the early 20th century by Planck, Bohr, Heisenberg, and others.
-[^3]: The Standard Model of particle physics was developed in the 1970s.
+[^1]: Published by Einstein in 1905.
 
 ---
 
-## 📊 Tables
+## Table
 
-| Algorithm | Time Complexity | Space Complexity | Stable |
-|-----------|-----------------|------------------|--------|
-| Bubble Sort | O(n²) | O(1) | ✅ Yes |
-| Quick Sort | O(n log n) | O(log n) | ❌ No |
-| Merge Sort | O(n log n) | O(n) | ✅ Yes |
-| Heap Sort | O(n log n) | O(1) | ❌ No |
-
-| ویژگی | وضعیت | توضیحات |
-|-------|-------|---------|
-| مارک‌داون | ✅ فعال | پشتیبانی کامل |
-| ریاضیات | ✅ فعال | با رنگ و فارسی |
-| کد | ✅ فعال | +۲۰۰ زبان |
+| Feature | Status |
+|---------|--------|
+| Markdown | ✅ |
+| MathJax | ✅ |
+| RTL | ✅ |
 
 ---
 
-## 📌 Lists
-
-### Ordered List
+## Lists
 
 1. First item
-2. Second item
-3. Third item with inline code \`example\`
-4. Fourth item with math $x^2 + y^2 = z^2$
+2. Second item with \`code\`
+3. Third item with $x^2$
 
-### Unordered List
-
-- Item with **bold** text
-- Item with *italic* text
-- Item with \`code\`
-- Item with [link](https://example.com)
+- Item with **bold**
+- Item with *italic*
 
 ### لیست فارسی
 
-- مورد اول با **متن پررنگ**
-- مورد دوم با فرمول $a + b = c$
-- مورد سوم با کد \`console.log()\`
+- مورد اول
+- مورد دوم
+- مورد سوم
 
 ---
-
-## 💬 Blockquotes
 
 > "The only way to do great work is to love what you do."
-> — Steve Jobs
 
-> 💡 **Pro Tip:** Use \`\\text{فارسی}\` for Persian text inside math formulas!
-
-> 📝 **نکته:** برای نوشتن فارسی در فرمول‌ها از \`\\text{متن فارسی}\` استفاده کنید!
-
----
-
-## 🔗 Links & Images
-
-Check out [GitHub](https://github.com) | [MDN Web Docs](https://developer.mozilla.org) | [Stack Overflow](https://stackoverflow.com)
-
----
-
-## ✨ Mixed Content
-
-This paragraph contains both English and فارسی text with inline math $\\alpha + \\beta = \\gamma$ and code \`function()\`.
-
-این پاراگراف شامل متن فارسی و English با فرمول درون‌خطی $x = \\frac{-b}{2a}$ و کد \`npm install\` است.
-
-**Happy writing!** ✨ **نوشتن خوش!** 🎉`;
+> 📝 **نکته:** متن فارسی در blockquote`;
 
         // Initialize with sample content
         markdownInput.value = sampleMarkdown;
         
-        // Initial render after MathJax loads
+        // Render after page and MathJax are ready
         if (document.readyState === 'complete') {
             setTimeout(updatePreview, 500);
         } else {
