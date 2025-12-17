@@ -110,6 +110,12 @@
             overflow-x: auto;
             overflow-y: auto;
         }
+        
+        /* Wrapper for horizontal scrolling */
+        .markdown-inner {
+            display: inline-block;
+            min-width: 100%;
+        }
 
         /* ----- Markdown Output Base Styles ----- */
         .markdown-body {
@@ -1094,8 +1100,8 @@
             // Step 5: Add footnotes section at the bottom
             html = appendFootnotesSection(html);
             
-            // Step 6: Render to DOM
-            markdownOutput.innerHTML = html;
+            // Step 6: Render to DOM with wrapper for horizontal scroll
+            markdownOutput.innerHTML = '<div class="markdown-inner">' + html + '</div>';
             
             // Step 7: Apply per-block RTL/LTR direction
             const directionCounts = applyPerBlockDirection(markdownOutput);
