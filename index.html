@@ -25,17 +25,16 @@
     <script>
         window.MathJax = {
             tex: {
-                inlineMath: [['$', '$']],       // Single $ for inline math
-                displayMath: [['$$', '$$']],    // Double $$ for block math
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']],
                 processEscapes: true,
                 processEnvironments: true
             },
             options: {
-                // Don't process math inside these HTML tags
                 skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
             },
             chtml: {
-                mtextInheritFont: true,  // Use document font for \text{} commands
+                mtextInheritFont: true,
                 scale: 1
             },
             svg: {
@@ -45,7 +44,7 @@
             startup: {
                 ready: () => {
                     MathJax.startup.defaultReady();
-                    window.mathJaxReady = true;  // Flag to check if MathJax is ready
+                    window.mathJaxReady = true;
                 }
             }
         };
@@ -107,14 +106,13 @@
 
         /* ----- Preview Container ----- */
         .preview-container {
-            overflow-x: auto;
             overflow-y: auto;
+            overflow-x: hidden;
         }
-        
-        /* Wrapper for horizontal scrolling */
+
         .markdown-inner {
-            display: inline-block;
-            min-width: 100%;
+            width: 100%;
+            max-width: 100%;
         }
 
         /* ----- Markdown Output Base Styles ----- */
@@ -135,20 +133,18 @@
             text-align: left;
         }
 
-        /* RTL list padding adjustment */
-        .markdown-body ul[dir="rtl"], 
+        .markdown-body ul[dir="rtl"],
         .markdown-body ol[dir="rtl"] {
             padding-left: 0;
             padding-right: 2em;
         }
 
-        .markdown-body ul[dir="ltr"], 
+        .markdown-body ul[dir="ltr"],
         .markdown-body ol[dir="ltr"] {
             padding-left: 2em;
             padding-right: 0;
         }
 
-        /* RTL blockquote border adjustment */
         .markdown-body blockquote[dir="rtl"] {
             border-left: none;
             border-right: 3px solid #cbd5e1;
@@ -208,7 +204,8 @@
         }
 
         /* ----- Lists ----- */
-        .markdown-body ul, .markdown-body ol {
+        .markdown-body ul,
+        .markdown-body ol {
             margin-bottom: 1em;
             padding-left: 2em;
         }
@@ -236,8 +233,7 @@
             text-decoration: underline;
         }
 
-        /* ----- Inline Code ----- 
-           Uses unicode-bidi: isolate to prevent RTL text from affecting code direction */
+        /* ----- Inline Code ----- */
         .markdown-body code:not([class*="language-"]) {
             background: #f1f5f9;
             padding: 0.15em 0.4em;
@@ -260,7 +256,6 @@
             overflow-y: hidden;
             direction: ltr !important;
             text-align: left !important;
-            max-width: 100%;
         }
 
         .markdown-body pre code {
@@ -268,7 +263,6 @@
             font-size: 0.875em;
             line-height: 1.6;
             display: block;
-            min-width: max-content;
             unicode-bidi: normal;
             white-space: pre;
         }
@@ -295,18 +289,21 @@
         .markdown-body .table-wrapper {
             overflow-x: auto;
             margin: 1em 0;
+            max-width: 100%;
         }
 
         .markdown-body table {
-            width: 100%;
-            min-width: 400px;
+            width: max-content;
+            min-width: 100%;
             border-collapse: collapse;
         }
 
-        .markdown-body th, .markdown-body td {
+        .markdown-body th,
+        .markdown-body td {
             padding: 0.5em 1em;
             border: 1px solid #e2e8f0;
             text-align: left;
+            white-space: nowrap;
         }
 
         .markdown-body th {
@@ -319,8 +316,7 @@
             background: white;
         }
 
-        /* ----- MathJax Inline ----- 
-           Ensures inline math doesn't cause layout issues */
+        /* ----- MathJax Inline ----- */
         mjx-container:not([display="true"]) {
             display: inline-block !important;
             overflow: visible !important;
@@ -331,21 +327,26 @@
         }
 
         /* ----- MathJax Block/Display ----- */
+        .math-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin: 1em 0;
+            max-width: 100%;
+        }
+
         mjx-container[display="true"] {
             display: block !important;
-            margin: 1em auto !important;
+            margin: 0 auto !important;
             padding: 1em;
             background: #fffbeb;
             border-radius: 8px;
             border: 1px solid #fef3c7;
             text-align: center !important;
             direction: ltr !important;
-            overflow-x: auto;
-            overflow-y: hidden;
-            max-width: 100%;
+            width: max-content;
+            min-width: 100%;
         }
 
-        /* Allow Persian/Arabic text in MathJax to use proper font */
         mjx-mtext {
             font-family: 'Vazirmatn', 'Inter', sans-serif !important;
         }
@@ -393,8 +394,7 @@
             margin-left: 0.5em;
         }
 
-        /* ----- BDI Elements -----
-           Used to isolate Latin text sequences in RTL content */
+        /* ----- BDI Elements ----- */
         .markdown-body bdi {
             unicode-bidi: isolate;
         }
@@ -419,7 +419,6 @@
             background: #64748b;
         }
 
-        /* Dark scrollbar for editor and code blocks */
         .editor-textarea::-webkit-scrollbar-track,
         pre::-webkit-scrollbar-track {
             background: #334155;
@@ -460,20 +459,9 @@
             font-weight: 500;
         }
 
-        .status-badge.mixed {
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        .status-badge.rtl {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-badge.ltr {
-            background: #dbeafe;
-            color: #1e40af;
-        }
+        .status-badge.mixed { background: #f1f5f9; color: #475569; }
+        .status-badge.rtl { background: #fef3c7; color: #92400e; }
+        .status-badge.ltr { background: #dbeafe; color: #1e40af; }
 
         /* ----- Stats Display ----- */
         .stats-text {
@@ -518,7 +506,6 @@
             
             <!-- Editor Panel -->
             <div class="flex flex-col">
-                <!-- Panel Title Bar -->
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-slate-600">Editor</span>
                     <div class="stats-text" id="stats">
@@ -526,7 +513,6 @@
                     </div>
                 </div>
                 
-                <!-- Editor Card -->
                 <div class="card overflow-hidden flex-1 flex flex-col">
                     <div class="panel-header">
                         <div class="panel-dot red"></div>
@@ -534,8 +520,8 @@
                         <div class="panel-dot green"></div>
                         <span class="text-slate-400 text-xs ml-3 font-mono">document.md</span>
                     </div>
-                    <textarea 
-                        id="markdown-input" 
+                    <textarea
+                        id="markdown-input"
                         class="editor-textarea w-full flex-1 p-4 min-h-[550px]"
                         placeholder="Start typing Markdown here..."
                         spellcheck="false"
@@ -545,7 +531,6 @@
 
             <!-- Preview Panel -->
             <div class="flex flex-col">
-                <!-- Panel Title Bar -->
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-slate-600">Preview</span>
                     <div class="flex items-center gap-2">
@@ -556,7 +541,6 @@
                     </div>
                 </div>
                 
-                <!-- Preview Card -->
                 <div class="card overflow-hidden flex-1 flex flex-col">
                     <div class="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
                         <div class="flex gap-1.5">
@@ -566,8 +550,8 @@
                         </div>
                         <span class="text-slate-400 text-xs ml-2 font-mono">preview.html</span>
                     </div>
-                    <div 
-                        id="markdown-output" 
+                    <div
+                        id="markdown-output"
                         class="markdown-body preview-container p-6 min-h-[550px] flex-1"
                     >
                         <p class="text-slate-400 text-center italic">Your preview will appear here...</p>
@@ -591,11 +575,7 @@
         // =============================================
         // UTILITY FUNCTIONS
         // =============================================
-        
-        /**
-         * Escapes HTML special characters to prevent XSS attacks
-         * Used when rendering user-provided content
-         */
+
         function escapeHtml(text) {
             return text
                 .replace(/&/g, '&amp;')
@@ -604,12 +584,6 @@
                 .replace(/"/g, '&quot;');
         }
 
-        /**
-         * Creates a debounced version of a function
-         * Prevents excessive calls during rapid input
-         * @param {Function} func - Function to debounce
-         * @param {number} wait - Milliseconds to wait before executing
-         */
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -624,26 +598,17 @@
 
         // =============================================
         // FOOTNOTE EXTENSION FOR MARKED.JS
-        // Implements GitHub-style footnotes: [^1] and [^1]: definition
         // =============================================
-        
-        /**
-         * Storage for footnote data during parsing
-         * Must be reset before each parse to avoid data leakage
-         */
+
         const footnoteStorage = {
-            footnotes: {},      // Map of footnote ID to content
-            footnoteRefs: [],   // Ordered list of referenced footnote IDs
+            footnotes: {},
+            footnoteRefs: [],
             reset() {
                 this.footnotes = {};
                 this.footnoteRefs = [];
             }
         };
 
-        /**
-         * Marked.js extension for footnote references [^1]
-         * Captures references in the text and creates superscript links
-         */
         const footnoteRefExtension = {
             name: 'footnoteRef',
             level: 'inline',
@@ -651,11 +616,9 @@
                 return src.match(/\[\^/)?.index;
             },
             tokenizer(src) {
-                // Match [^id] but NOT [^id]: (which is a definition)
                 const match = /^\[\^([^\]]+)\](?!\:)/.exec(src);
                 if (match) {
                     const id = match[1].trim();
-                    // Track reference order for numbering
                     if (!footnoteStorage.footnoteRefs.includes(id)) {
                         footnoteStorage.footnoteRefs.push(id);
                     }
@@ -672,10 +635,6 @@
             }
         };
 
-        /**
-         * Marked.js extension for footnote definitions [^1]: text
-         * Captures definitions and stores them for later rendering
-         */
         const footnoteDefExtension = {
             name: 'footnoteDef',
             level: 'block',
@@ -687,7 +646,6 @@
                 if (match) {
                     const id = match[1].trim();
                     const content = match[2].trim();
-                    // Store definition for later use
                     footnoteStorage.footnotes[id] = content;
                     return {
                         type: 'footnoteDef',
@@ -698,19 +656,14 @@
                 }
             },
             renderer(token) {
-                // Don't render anything inline - footnotes appear at the bottom
                 return '';
             }
         };
 
-        /**
-         * Generates the footnotes section HTML
-         * Called after main content parsing to append footnotes at the bottom
-         */
         function appendFootnotesSection(html) {
             const ids = footnoteStorage.footnoteRefs;
             if (ids.length === 0) return html;
-            
+
             let footnotesHtml = '<section class="footnotes"><ol>';
             ids.forEach((id, index) => {
                 const content = footnoteStorage.footnotes[id] || 'Footnote not defined';
@@ -718,27 +671,23 @@
                 footnotesHtml += `<li id="fn-${id}"><p>${parsedContent} <a href="#fnref-${id}" class="footnote-backref">↩</a></p></li>`;
             });
             footnotesHtml += '</ol></section>';
-            
+
             return html + footnotesHtml;
         }
 
         // =============================================
         // MARKED.JS CONFIGURATION
         // =============================================
-        
+
         marked.use({
-            breaks: true,   // Convert single line breaks to <br>
-            gfm: true,      // Enable GitHub Flavored Markdown
+            breaks: true,
+            gfm: true,
             extensions: [footnoteRefExtension, footnoteDefExtension],
             renderer: {
-                /**
-                 * Custom code block renderer with Prism.js syntax highlighting
-                 */
-                code({text, lang, escaped}) {
+                code({ text, lang, escaped }) {
                     const langClass = lang ? escapeHtml(lang.split(/\s/)[0]) : 'plaintext';
                     let highlighted;
-            
-                    // Use Prism if language is supported
+
                     if (lang && Prism.languages[lang]) {
                         try {
                             highlighted = Prism.highlight(text, Prism.languages[lang], lang);
@@ -749,25 +698,22 @@
                     } else {
                         highlighted = escaped ? text : escapeHtml(text);
                     }
-            
+
                     return `<pre class="language-${langClass}"><code class="language-${langClass}">${highlighted}</code></pre>`;
                 }
             }
         });
 
-        /**
-         * Wraps tables in scrollable containers for responsive display
-         */
         function wrapTables(html) {
             return html
                 .replace(/<table>/g, '<div class="table-wrapper"><table>')
                 .replace(/<\/table>/g, '</table></div>');
         }
-        
+
         // =============================================
         // DOM ELEMENT REFERENCES
         // =============================================
-        
+
         const markdownInput = document.getElementById('markdown-input');
         const markdownOutput = document.getElementById('markdown-output');
         const directionIndicator = document.getElementById('direction-indicator');
@@ -779,66 +725,47 @@
         // RTL/LTR DIRECTION DETECTION
         // =============================================
 
-        // Unicode ranges for Persian/Arabic characters
         const PERSIAN_ARABIC_PATTERN = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g;
-        
-        // Unicode ranges for Latin characters (including extended Latin)
         const LATIN_PATTERN = /[A-Za-z\u00C0-\u024F]/g;
 
-        /**
-         * Counts Persian/Arabic vs Latin characters in text
-         * Strips out code, math, URLs, and punctuation before counting
-         */
         function countCharacterTypes(text) {
-            // Remove content that shouldn't affect direction detection
             const cleanText = text
-                .replace(/<[^>]*>/g, '')              // HTML tags
-                .replace(/\$\$[\s\S]*?\$\$/g, '')     // Block math
-                .replace(/\$[^$]+\$/g, '')            // Inline math
-                .replace(/`[^`]+`/g, '')              // Inline code
-                .replace(/```[\s\S]*?```/g, '')       // Code blocks
-                .replace(/https?:\/\/[^\s]+/g, '')    // URLs
-                .replace(/[0-9\s\p{P}\p{S}]/gu, '');  // Numbers, spaces, punctuation
-            
+                .replace(/<[^>]*>/g, '')
+                .replace(/\$\$[\s\S]*?\$\$/g, '')
+                .replace(/\$[^$]+\$/g, '')
+                .replace(/`[^`]+`/g, '')
+                .replace(/```[\s\S]*?```/g, '')
+                .replace(/https?:\/\/[^\s]+/g, '')
+                .replace(/[0-9\s\p{P}\p{S}]/gu, '');
+
             const persianMatches = cleanText.match(PERSIAN_ARABIC_PATTERN) || [];
             const latinMatches = cleanText.match(LATIN_PATTERN) || [];
-            
+
             return {
                 persian: persianMatches.length,
                 latin: latinMatches.length
             };
         }
 
-        /**
-         * Determines text direction based on character majority
-         * Returns 'rtl' if Persian/Arabic characters dominate, otherwise 'ltr'
-         */
         function getElementDirection(text) {
             const counts = countCharacterTypes(text);
-            
-            // Default to LTR if no significant characters found
+
             if (counts.persian === 0 && counts.latin === 0) {
                 return 'ltr';
             }
-            
+
             return counts.persian > counts.latin ? 'rtl' : 'ltr';
         }
 
-        /**
-         * Applies direction attribute to each block element individually
-         * This allows mixed RTL/LTR content to display correctly
-         */
         function applyPerBlockDirection(container) {
             let rtlCount = 0;
             let ltrCount = 0;
-            
-            // Block elements that should have direction applied
+
             const blockSelectors = [
                 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                 'li', 'blockquote', 'th', 'td'
             ];
-            
-            // Apply direction to list containers
+
             const lists = container.querySelectorAll('ul, ol');
             lists.forEach(list => {
                 const listText = list.textContent || '';
@@ -846,21 +773,19 @@
                 list.setAttribute('dir', direction);
                 if (direction === 'rtl') rtlCount++; else ltrCount++;
             });
-            
-            // Apply direction to each block element
+
             blockSelectors.forEach(selector => {
                 const elements = container.querySelectorAll(selector);
                 elements.forEach(el => {
-                    // Skip elements inside code blocks
                     if (el.closest('pre') || el.closest('code')) {
                         return;
                     }
-                    
+
                     const text = el.textContent || '';
                     const direction = getElementDirection(text);
-                    
+
                     el.setAttribute('dir', direction);
-                    
+
                     if (direction === 'rtl') {
                         rtlCount++;
                     } else {
@@ -868,119 +793,78 @@
                     }
                 });
             });
-            
+
             return { rtlCount, ltrCount };
         }
 
         // =============================================
         // BIDIRECTIONAL TEXT ISOLATION
-        // Fixes display issues when Latin text appears within RTL content
         // =============================================
-        
-        /**
-         * Isolates Latin character sequences within RTL elements using <bdi> tags
-         * 
-         * Problem: When Latin text like "C++" or "my name is amin" appears in RTL context,
-         * browsers may incorrectly reverse the character/word order.
-         * 
-         * Solution: Wrap Latin sequences in <bdi> (bidirectional isolate) elements
-         * which prevents the RTL context from affecting their display order.
-         * 
-         * IMPORTANT: Must run AFTER MathJax rendering to avoid breaking math elements
-         */
+
         function isolateLatinInRTL(container) {
             const rtlElements = container.querySelectorAll('[dir="rtl"]');
-            
+
             rtlElements.forEach(el => {
-                // Skip code elements - they handle their own direction
                 if (el.tagName === 'PRE' || el.tagName === 'CODE') return;
                 if (el.closest('pre') || el.closest('code')) return;
-                
-                // Collect all text nodes (avoid modifying DOM while iterating)
+
                 const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
                 const textNodes = [];
                 let currentNode;
-                
+
                 while (currentNode = walker.nextNode()) {
                     const parent = currentNode.parentElement;
-                    // Skip text inside elements that shouldn't be processed
                     if (parent && !parent.closest('code, pre, bdi, mjx-container, mjx-math, mjx-mrow, mjx-mi, mjx-mo, mjx-mn, mjx-mtext, mjx-msup, mjx-msub, mjx-mfrac, mjx-msqrt, mjx-mroot, mjx-mtable, mjx-mtr, mjx-mtd, script, style')) {
                         textNodes.push(currentNode);
                     }
                 }
-                
-                // Process each text node
+
                 textNodes.forEach(textNode => {
                     const text = textNode.textContent;
-                    
-                    /**
-                     * Regex to match Latin text sequences while EXCLUDING:
-                     * 
-                     * - RTL characters (Persian/Arabic Unicode ranges)
-                     * - Whitespace (\s)
-                     * - All brackets and quotation marks:
-                     *   
-                     *   Standard:     ( ) [ ] { } < >
-                     *   Guillemets:   « » ‹ ›
-                     *   Curly quotes: " " ' '
-                     *   Straight:     " '
-                     *   CJK:          「  」 『 』 【 】 〔 〕 〈 〉 《 》
-                     *   Math:         ⟨ ⟩ ⟪ ⟫
-                     *   Other:        ⦃ ⦄ ⦗ ⦘ ⁽ ⁾ ₍ ₎
-                     */
+
                     const regex = /[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*(?:\s+[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*)*/g;
-                            
+
                     if (!regex.test(text)) return;
-                    regex.lastIndex = 0;  // Reset regex state
-                    
+                    regex.lastIndex = 0;
+
                     const fragment = document.createDocumentFragment();
                     let lastIndex = 0;
                     let match;
                     let hasMatches = false;
-                    
+
                     while ((match = regex.exec(text)) !== null) {
                         hasMatches = true;
-                        
-                        // Add text before the match (Persian text)
+
                         if (match.index > lastIndex) {
                             fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
                         }
-                        
+
                         let matchedText = match[0];
                         let trailingPunct = '';
-                        
-                        /**
-                         * Strip trailing sentence punctuation from the isolated block
-                         * Punctuation like . ! ? , should stay in RTL context for proper placement
-                         * Example: "test." should become <bdi>test</bdi>. not <bdi>test.</bdi>
-                         */
+
                         const trailingMatch = matchedText.match(/[.!?,;:]+$/);
                         if (trailingMatch) {
                             trailingPunct = trailingMatch[0];
                             matchedText = matchedText.slice(0, -trailingPunct.length);
                         }
-                        
-                        // Wrap Latin sequence in <bdi> for bidirectional isolation
+
                         if (matchedText) {
                             const bdi = document.createElement('bdi');
                             bdi.textContent = matchedText;
                             fragment.appendChild(bdi);
                         }
-                        
-                        // Add punctuation outside the isolation (stays in RTL context)
+
                         if (trailingPunct) {
                             fragment.appendChild(document.createTextNode(trailingPunct));
                         }
-                        
+
                         lastIndex = regex.lastIndex;
                     }
-                    
-                    // Add remaining text after last match
+
                     if (lastIndex < text.length) {
                         fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
                     }
-                    
-                    // Replace original text node with processed fragment
+
                     if (hasMatches && textNode.parentNode) {
                         textNode.parentNode.replaceChild(fragment, textNode);
                     }
@@ -989,16 +873,29 @@
         }
 
         // =============================================
+        // WRAP BLOCK MATH IN SCROLLABLE CONTAINER
+        // =============================================
+
+        function wrapBlockMath(container) {
+            const blockMathContainers = container.querySelectorAll('mjx-container[display="true"]');
+            blockMathContainers.forEach(mjx => {
+                if (!mjx.parentElement.classList.contains('math-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'math-wrapper';
+                    mjx.parentNode.insertBefore(wrapper, mjx);
+                    wrapper.appendChild(mjx);
+                }
+            });
+        }
+
+        // =============================================
         // UI UPDATE FUNCTIONS
         // =============================================
 
-        /**
-         * Updates the direction indicator badge in the UI
-         */
         function updateDirectionIndicator(rtlCount, ltrCount) {
             const total = rtlCount + ltrCount;
             let badgeClass, label;
-            
+
             if (total === 0) {
                 badgeClass = 'ltr';
                 label = 'LTR';
@@ -1012,14 +909,11 @@
                 badgeClass = 'ltr';
                 label = 'LTR';
             }
-            
+
             directionIndicator.innerHTML = `<span class="status-badge ${badgeClass}">${label}</span>`;
             directionStats.textContent = `RTL: ${rtlCount} · LTR: ${ltrCount}`;
         }
 
-        /**
-         * Updates word and character count display
-         */
         function updateStats(text) {
             const chars = text.length;
             const words = text.trim() ? text.trim().split(/\s+/).length : 0;
@@ -1029,108 +923,83 @@
 
         // =============================================
         // MATH EXPRESSION HANDLING
-        // Protects math from being processed by Markdown parser
         // =============================================
 
-        /**
-         * Temporarily replaces math expressions with placeholders
-         * This prevents Markdown parser from corrupting LaTeX syntax
-         */
         function escapeMath(text) {
             const mathBlocks = [];
             const inlineMaths = [];
-            
-            // Escape block math $$...$$ (can be multiline)
+
             text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
                 mathBlocks.push(match);
                 return `%%MATHBLOCK${mathBlocks.length - 1}%%`;
             });
-            
-            // Escape inline math $...$ (single line only)
+
             text = text.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
                 inlineMaths.push(match);
                 return `%%MATHINLINE${inlineMaths.length - 1}%%`;
             });
-            
+
             return { text, mathBlocks, inlineMaths };
         }
 
-        /**
-         * Restores math expressions after Markdown parsing
-         */
         function restoreMath(html, mathBlocks, inlineMaths) {
             mathBlocks.forEach((math, i) => {
                 html = html.replace(`%%MATHBLOCK${i}%%`, math);
             });
-            
+
             inlineMaths.forEach((math, i) => {
                 html = html.replace(`%%MATHINLINE${i}%%`, math);
             });
-            
+
             return html;
         }
 
         // =============================================
         // MAIN UPDATE FUNCTION
-        // Orchestrates the entire preview rendering pipeline
         // =============================================
 
         function updatePreview() {
             const rawMarkdown = markdownInput.value;
-            
-            // Update statistics
+
             updateStats(rawMarkdown);
-            
-            // Handle empty input
+
             if (rawMarkdown.trim() === '') {
                 markdownOutput.innerHTML = '<p class="text-slate-400 text-center italic">Your preview will appear here...</p>';
                 updateDirectionIndicator(0, 0);
                 return;
             }
-            
-            // Reset footnote storage for fresh parse
+
             footnoteStorage.reset();
-            
-            // Step 1: Protect math expressions from Markdown parser
+
             const { text, mathBlocks, inlineMaths } = escapeMath(rawMarkdown);
-            
-            // Step 2: Parse Markdown to HTML
+
             let html = marked.parse(text);
-            
-            // Step 3: Restore math expressions
+
             html = restoreMath(html, mathBlocks, inlineMaths);
-            
-            // Step 4: Wrap tables for responsive scrolling
+
             html = wrapTables(html);
-            
-            // Step 5: Add footnotes section at the bottom
+
             html = appendFootnotesSection(html);
-            
-            // Step 6: Render to DOM with wrapper for horizontal scroll
+
             markdownOutput.innerHTML = '<div class="markdown-inner">' + html + '</div>';
-            
-            // Step 7: Apply per-block RTL/LTR direction
+
             const directionCounts = applyPerBlockDirection(markdownOutput);
             updateDirectionIndicator(directionCounts.rtlCount, directionCounts.ltrCount);
-            
-            // Step 8: Apply syntax highlighting to code blocks
+
             Prism.highlightAllUnder(markdownOutput);
-            
-            // Step 9: Render math with MathJax, then fix bidirectional text
+
             if (window.MathJax && window.MathJax.typesetPromise) {
                 MathJax.typesetClear([markdownOutput]);
                 MathJax.typesetPromise([markdownOutput])
                     .then(() => {
-                        // Must run AFTER MathJax to avoid breaking math elements
+                        wrapBlockMath(markdownOutput);
                         isolateLatinInRTL(markdownOutput);
                     })
                     .catch((err) => {
                         console.error('MathJax error:', err);
-                        // Still try to fix bidi even if MathJax fails
                         isolateLatinInRTL(markdownOutput);
                     });
             } else {
-                // MathJax not available, just fix bidi
                 isolateLatinInRTL(markdownOutput);
             }
         }
@@ -1139,109 +1008,177 @@
         // EVENT LISTENERS
         // =============================================
 
-        // Debounce input to prevent excessive re-renders during fast typing
         const debouncedUpdate = debounce(updatePreview, 150);
         markdownInput.addEventListener('input', debouncedUpdate);
-
-        // Handle paste events with immediate update
         markdownInput.addEventListener('paste', () => setTimeout(updatePreview, 0));
 
         // =============================================
         // SAMPLE CONTENT
-        // Demonstrates various features of the previewer
         // =============================================
 
-        const sampleMarkdown = `# Markdown Previewer
+        const sampleMarkdown = `# 🚀 Markdown Previewer Demo
 
-A **powerful** editor with *real-time preview*, LaTeX math, syntax highlighting, and **smart RTL detection**.
+Welcome to this **feature-rich** Markdown previewer! It supports *real-time preview*, syntax highlighting, LaTeX math, and **intelligent RTL/LTR detection**.
 
 ---
 
-## Math Examples
+## 📐 Mathematics
 
-Inline math: $E = mc^2$ and $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
+### Inline Math
 
-Block equation:
+The famous equation $E = mc^2$ revolutionized physics. The quadratic formula is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$.
+
+### Block Equations
+
+The Gaussian integral:
 
 $$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
 
----
+Euler's identity, often called the most beautiful equation:
 
-## بخش فارسی
+$$e^{i\\pi} + 1 = 0$$
 
-معادلۀ انیشتین $E = mc^2$ فیزیک را متحول کرد.
+Maxwell's equations in differential form:
 
-$$\\nabla \\times \\vec{E} = -\\frac{\\partial \\vec{B}}{\\partial t}$$
-
-### کد در متن فارسی
-
-برای اجرای برنامه از \`npm start\` استفاده کنید.
-
-زبان‌های برنامه‌نویسی مثل C++ و Python و JavaScript محبوب هستند.
+$$\\nabla \\cdot \\vec{E} = \\frac{\\rho}{\\varepsilon_0}, \\quad \\nabla \\times \\vec{B} = \\mu_0\\vec{J} + \\mu_0\\varepsilon_0\\frac{\\partial \\vec{E}}{\\partial t}$$
 
 ---
 
-## Code Examples
+## 💻 Code Examples
+
+### JavaScript
 
 \`\`\`javascript
-async function fetchData(url) {
-    const response = await fetch(url);
-    return response.json();
+const fibonacci = (n) => {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+};
+
+console.log(fibonacci(10)); // 55
+\`\`\`
+
+### Python
+
+\`\`\`python
+def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)
+\`\`\`
+
+### Rust
+
+\`\`\`rust
+fn main() {
+    let numbers: Vec<i32> = (1..=10).collect();
+    let sum: i32 = numbers.iter().sum();
+    println!("Sum: {}", sum);
 }
 \`\`\`
 
-\`\`\`python
-def fibonacci(n):
-    if n <= 1:
-        return n
-    return fibonacci(n-1) + fibonacci(n-2)
-\`\`\`
+Inline code works too: Use \`npm install\` or \`pip install\` to manage packages.
 
 ---
 
-## Footnotes
+## 🌍 Multilingual Support
 
-The theory of relativity[^1] changed physics forever.
+### بخش فارسی
 
-[^1]: Published by Einstein in 1905.
+این پیش‌نمایشگر از **زبان فارسی** پشتیبانی می‌کند. معادلۀ معروف $E = mc^2$ فیزیک را متحول کرد.
 
----
+فرمول مشتق:
 
-## Table
+$$\\frac{d}{dx}[f(x) \\cdot g(x)] = f'(x)g(x) + f(x)g'(x)$$
 
-| Feature | Status |
-|---------|--------|
-| Markdown | ✅ |
-| MathJax | ✅ |
-| RTL | ✅ |
+### کد در متن فارسی
 
----
+برای نصب پکیج از دستور \`npm install package-name\` استفاده کنید.
 
-## Lists
-
-1. First item
-2. Second item with \`code\`
-3. Third item with $x^2$
-
-- Item with **bold**
-- Item with *italic*
+زبان‌های محبوب: Python و JavaScript و Rust و Go.
 
 ### لیست فارسی
 
-- مورد اول
-- مورد دوم
-- مورد سوم
+- مورد اول با **متن پررنگ**
+- مورد دوم با *متن کج*
+- مورد سوم با \`کد درون‌خطی\`
+- مورد چهارم با فرمول $x^2 + y^2 = r^2$
 
 ---
 
-> "The only way to do great work is to love what you do."
+## 📋 Tables
 
-> 📝 **نکته:** متن فارسی در blockquote`;
+| Language | Paradigm | Year | Creator |
+|----------|----------|------|---------|
+| Python | Multi-paradigm | 1991 | Guido van Rossum |
+| JavaScript | Multi-paradigm | 1995 | Brendan Eich |
+| Rust | Systems | 2010 | Graydon Hoare |
+| Go | Concurrent | 2009 | Robert Griesemer |
+
+---
+
+## 📝 Lists
+
+### Ordered List
+
+1. First item with **bold text**
+2. Second item with \`inline code\`
+3. Third item with math: $\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$
+4. Fourth item with a [link](https://example.com)
+
+### Unordered List
+
+- Item with *italics*
+- Item with ~~strikethrough~~
+- Nested items:
+  - Sub-item one
+  - Sub-item two
+  - Sub-item three
+
+---
+
+## 📚 Footnotes
+
+The theory of general relativity[^1] describes gravity as a geometric property of spacetime.
+
+Quantum mechanics[^2] revolutionized our understanding of atomic and subatomic particles.
+
+[^1]: Published by Albert Einstein in 1915.
+[^2]: Developed in the early 20th century by Planck, Bohr, Heisenberg, and Schrödinger.
+
+---
+
+## 💬 Blockquotes
+
+> "The only way to do great work is to love what you do."
+> — *Steve Jobs*
+
+> 📌 **نکته مهم:** این پیش‌نمایشگر به صورت خودکار جهت متن را تشخیص می‌دهد.
+
+> \`\`\`
+> Code blocks inside blockquotes also work!
+> \`\`\`
+
+---
+
+## 🎨 Text Formatting
+
+- **Bold text** for emphasis
+- *Italic text* for subtle emphasis
+- ***Bold and italic*** combined
+- ~~Strikethrough~~ for deleted text
+- \`Inline code\` for technical terms
+
+---
+
+*Built with Marked.js, MathJax, and Prism.js* ✨`;
 
         // Initialize with sample content
         markdownInput.value = sampleMarkdown;
-        
-        // Render after page and MathJax are ready
+
         if (document.readyState === 'complete') {
             setTimeout(updatePreview, 500);
         } else {
