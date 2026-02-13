@@ -133,6 +133,21 @@
             text-align: left;
         }
 
+        /* ----- Line Block Styling ----- */
+        .markdown-body .line-block {
+            display: block;
+        }
+
+        .markdown-body .line-block[dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .markdown-body .line-block[dir="ltr"] {
+            direction: ltr;
+            text-align: left;
+        }
+
         .markdown-body ul[dir="rtl"],
         .markdown-body ol[dir="rtl"] {
             padding-left: 0;
@@ -248,6 +263,58 @@
             white-space: nowrap;
         }
 
+        /* ----- Code Block Wrapper ----- */
+        .code-block-wrapper {
+            margin: 1em 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1e293b;
+        }
+
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .copy-btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            padding: 4px 12px;
+            background: #334155;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .copy-btn:hover {
+            background: #475569;
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+            color: white;
+        }
+
+        .copy-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
         /* ----- Code Blocks ----- */
         .markdown-body pre {
             margin: 1em 0;
@@ -256,6 +323,11 @@
             overflow-y: hidden;
             direction: ltr !important;
             text-align: left !important;
+        }
+
+        .code-block-wrapper pre {
+            margin: 0 !important;
+            border-radius: 0 !important;
         }
 
         .markdown-body pre code {
@@ -597,6 +669,34 @@
         }
 
         // =============================================
+        // COPY CODE FUNCTIONALITY
+        // =============================================
+
+        function copyCode(btn) {
+            const wrapper = btn.closest('.code-block-wrapper');
+            const codeEl = wrapper.querySelector('code');
+            const code = codeEl.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>Copied!`;
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Copy failed:', err);
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.copy-btn')) {
+                copyCode(e.target.closest('.copy-btn'));
+            }
+        });
+
+        // =============================================
         // FOOTNOTE EXTENSION FOR MARKED.JS
         // =============================================
 
@@ -660,13 +760,25 @@
             }
         };
 
-        function appendFootnotesSection(html) {
+        function restoreMathInText(text, mathBlocks, inlineMaths) {
+            let result = text;
+            mathBlocks.forEach((math, i) => {
+                result = result.replace(`%%MATHBLOCK${i}%%`, math);
+            });
+            inlineMaths.forEach((math, i) => {
+                result = result.replace(`%%MATHINLINE${i}%%`, math);
+            });
+            return result;
+        }
+
+        function appendFootnotesSection(html, mathBlocks, inlineMaths) {
             const ids = footnoteStorage.footnoteRefs;
             if (ids.length === 0) return html;
 
             let footnotesHtml = '<section class="footnotes"><ol>';
             ids.forEach((id, index) => {
-                const content = footnoteStorage.footnotes[id] || 'Footnote not defined';
+                let content = footnoteStorage.footnotes[id] || 'Footnote not defined';
+                content = restoreMathInText(content, mathBlocks, inlineMaths);
                 const parsedContent = marked.parseInline(content);
                 footnotesHtml += `<li id="fn-${id}"><p>${parsedContent} <a href="#fnref-${id}" class="footnote-backref">↩</a></p></li>`;
             });
@@ -686,6 +798,7 @@
             renderer: {
                 code({ text, lang, escaped }) {
                     const langClass = lang ? escapeHtml(lang.split(/\s/)[0]) : 'plaintext';
+                    const langDisplay = lang ? lang.split(/\s/)[0] : 'Plain Text';
                     let highlighted;
 
                     if (lang && Prism.languages[lang]) {
@@ -699,7 +812,15 @@
                         highlighted = escaped ? text : escapeHtml(text);
                     }
 
-                    return `<pre class="language-${langClass}"><code class="language-${langClass}">${highlighted}</code></pre>`;
+                    const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>`;
+
+                    return `<div class="code-block-wrapper">
+                        <div class="code-block-header">
+                            <span class="code-lang">${escapeHtml(langDisplay)}</span>
+                            <button class="copy-btn">${copyIcon}Copy</button>
+                        </div>
+                        <pre class="language-${langClass}"><code class="language-${langClass}">${highlighted}</code></pre>
+                    </div>`;
                 }
             }
         });
@@ -757,6 +878,73 @@
             return counts.persian > counts.latin ? 'rtl' : 'ltr';
         }
 
+        function processElementWithLineBreaks(el) {
+            let rtl = 0, ltr = 0;
+            
+            const brs = el.querySelectorAll('br');
+            
+            if (brs.length === 0) {
+                const text = el.textContent || '';
+                const direction = getElementDirection(text);
+                el.setAttribute('dir', direction);
+                if (direction === 'rtl') rtl++; else ltr++;
+                return { rtl, ltr };
+            }
+            
+            const directBrs = Array.from(el.childNodes).filter(
+                node => node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR'
+            );
+            
+            if (directBrs.length === 0) {
+                const text = el.textContent || '';
+                const direction = getElementDirection(text);
+                el.setAttribute('dir', direction);
+                if (direction === 'rtl') rtl++; else ltr++;
+                return { rtl, ltr };
+            }
+            
+            const fragment = document.createDocumentFragment();
+            let currentSpan = document.createElement('span');
+            currentSpan.className = 'line-block';
+            let currentText = '';
+            
+            Array.from(el.childNodes).forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+                    if (currentSpan.childNodes.length > 0 || currentText.trim()) {
+                        const direction = getElementDirection(currentText);
+                        currentSpan.setAttribute('dir', direction);
+                        if (direction === 'rtl') rtl++; else ltr++;
+                        fragment.appendChild(currentSpan);
+                    } else {
+                        const emptySpan = document.createElement('span');
+                        emptySpan.className = 'line-block';
+                        emptySpan.innerHTML = '&nbsp;';
+                        fragment.appendChild(emptySpan);
+                    }
+                    currentSpan = document.createElement('span');
+                    currentSpan.className = 'line-block';
+                    currentText = '';
+                } else {
+                    const clone = node.cloneNode(true);
+                    currentSpan.appendChild(clone);
+                    currentText += node.textContent || '';
+                }
+            });
+            
+            if (currentSpan.childNodes.length > 0 || currentText.trim()) {
+                const direction = getElementDirection(currentText);
+                currentSpan.setAttribute('dir', direction);
+                if (direction === 'rtl') rtl++; else ltr++;
+                fragment.appendChild(currentSpan);
+            }
+            
+            el.innerHTML = '';
+            el.appendChild(fragment);
+            el.removeAttribute('dir');
+            
+            return { rtl, ltr };
+        }
+
         function applyPerBlockDirection(container) {
             let rtlCount = 0;
             let ltrCount = 0;
@@ -781,16 +969,9 @@
                         return;
                     }
 
-                    const text = el.textContent || '';
-                    const direction = getElementDirection(text);
-
-                    el.setAttribute('dir', direction);
-
-                    if (direction === 'rtl') {
-                        rtlCount++;
-                    } else {
-                        ltrCount++;
-                    }
+                    const counts = processElementWithLineBreaks(el);
+                    rtlCount += counts.rtl;
+                    ltrCount += counts.ltr;
                 });
             });
 
@@ -979,7 +1160,7 @@
 
             html = wrapTables(html);
 
-            html = appendFootnotesSection(html);
+            html = appendFootnotesSection(html, mathBlocks, inlineMaths);
 
             markdownOutput.innerHTML = '<div class="markdown-inner">' + html + '</div>';
 
@@ -1107,6 +1288,12 @@ $$\\frac{d}{dx}[f(x) \\cdot g(x)] = f'(x)g(x) + f(x)g'(x)$$
 - مورد سوم با \`کد درون‌خطی\`
 - مورد چهارم با فرمول $x^2 + y^2 = r^2$
 
+### تست خط به خط
+این خط فارسی است
+This line is English
+این هم فارسی
+And this is English again
+
 ---
 
 ## 📋 Tables
@@ -1146,8 +1333,11 @@ The theory of general relativity[^1] describes gravity as a geometric property o
 
 Quantum mechanics[^2] revolutionized our understanding of atomic and subatomic particles.
 
+The equation $E=mc^2$ is famous[^3].
+
 [^1]: Published by Albert Einstein in 1915.
 [^2]: Developed in the early 20th century by Planck, Bohr, Heisenberg, and Schrödinger.
+[^3]: This shows that mass and energy are equivalent, where $E$ is energy, $m$ is mass, and $c$ is the speed of light.
 
 ---
 
