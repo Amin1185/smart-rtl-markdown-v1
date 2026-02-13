@@ -523,6 +523,16 @@
         .panel-dot.yellow { background: #fbbf24; }
         .panel-dot.green { background: #4ade80; }
 
+        /* ----- Preview Panel Header ----- */
+        .preview-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
         /* ----- Status Badge ----- */
         .status-badge {
             display: inline-flex;
@@ -690,6 +700,13 @@
         /* =============================================
            PRINT STYLES
            ============================================= */
+
+        /* Remove all page margins so browser has no space for headers/footers */
+        @page {
+            size: auto;
+            margin: 0mm;
+        }
+
         @media print {
             /* Hide everything except preview content */
             header,
@@ -697,6 +714,7 @@
             footer,
             .editor-textarea,
             .panel-header,
+            .preview-panel-header,
             .stats-text,
             .status-badge,
             #direction-indicator,
@@ -716,12 +734,18 @@
                 display: none !important;
             }
 
-            /* Reset body background */
+            /* Reset HTML element */
+            html {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Reset body - add padding since page margins are 0 */
             body {
                 background: white !important;
                 min-height: auto !important;
                 margin: 0 !important;
-                padding: 0 !important;
+                padding: 15mm !important;
             }
 
             /* Reset main container */
@@ -765,7 +789,7 @@
             }
 
             #markdown-output {
-                padding: 20px !important;
+                padding: 0 !important;
                 min-height: auto !important;
                 height: auto !important;
                 overflow: visible !important;
@@ -1038,13 +1062,13 @@
                 </div>
                 
                 <div class="card overflow-hidden flex-1 flex flex-col">
-                    <div class="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                    <div class="preview-panel-header">
                         <div class="flex gap-1.5">
                             <div class="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
                             <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
                             <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                         </div>
-                        <span class="text-slate-400 text-xs ml-2 font-mono">preview.html</span>
+                        <span class="text-slate-400 text-xs font-mono">preview.html</span>
                     </div>
                     <div
                         id="markdown-output"
