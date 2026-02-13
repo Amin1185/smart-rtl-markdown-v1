@@ -16,6 +16,9 @@
     <!-- Marked.js - Fast Markdown parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- DOMPurify - XSS sanitization -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    
     <!-- Prism.js - Syntax highlighting for code blocks -->
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
@@ -540,6 +543,143 @@
             font-size: 12px;
             color: #64748b;
         }
+
+        /* ----- Toolbar Styling ----- */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .toolbar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #334155;
+        }
+
+        .toolbar-btn:active {
+            transform: scale(0.98);
+        }
+
+        .toolbar-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: #e2e8f0;
+            margin: 0 8px;
+        }
+
+        .toolbar-label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-right: 8px;
+        }
+
+        .auto-save-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .auto-save-indicator.saving {
+            color: #f59e0b;
+        }
+
+        .auto-save-indicator.saved {
+            color: #22c55e;
+        }
+
+        .auto-save-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+
+        .auto-save-indicator.saving .auto-save-dot {
+            background: #f59e0b;
+            animation: pulse 1s infinite;
+        }
+
+        .auto-save-indicator.saved .auto-save-dot {
+            background: #22c55e;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ----- Sync Scroll Toggle ----- */
+        .sync-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sync-toggle input {
+            display: none;
+        }
+
+        .sync-toggle-switch {
+            position: relative;
+            width: 36px;
+            height: 20px;
+            background: #cbd5e1;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .sync-toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .sync-toggle input:checked + .sync-toggle-switch {
+            background: #3b82f6;
+        }
+
+        .sync-toggle input:checked + .sync-toggle-switch::after {
+            left: 18px;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -569,6 +709,47 @@
             </div>
         </div>
     </header>
+
+    <!-- =============================================
+         TOOLBAR
+         ============================================= -->
+    <div class="toolbar">
+        <span class="toolbar-label">Export:</span>
+        <button class="toolbar-btn" id="download-md-btn" title="Download as Markdown">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            Download .md
+        </button>
+        <button class="toolbar-btn" id="download-html-btn" title="Download as HTML">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+            Download .html
+        </button>
+        
+        <div class="toolbar-divider"></div>
+        
+        <label class="sync-toggle" title="Synchronize scrolling between editor and preview">
+            <input type="checkbox" id="sync-scroll-toggle" checked>
+            <span class="sync-toggle-switch"></span>
+            <span>Sync Scroll</span>
+        </label>
+        
+        <div class="toolbar-divider"></div>
+        
+        <button class="toolbar-btn" id="clear-storage-btn" title="Clear saved content">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+            Clear Saved
+        </button>
+        
+        <div class="auto-save-indicator" id="auto-save-indicator">
+            <span class="auto-save-dot"></span>
+            <span id="auto-save-text">Auto-save enabled</span>
+        </div>
+    </div>
 
     <!-- =============================================
          MAIN CONTENT - Editor and Preview Panels
@@ -637,13 +818,20 @@
          FOOTER
          ============================================= -->
     <footer class="text-center py-4 text-slate-400 text-xs border-t border-slate-100">
-        <p>Marked.js · MathJax · Prism.js</p>
+        <p>Marked.js · MathJax · Prism.js · DOMPurify</p>
     </footer>
 
     <!-- =============================================
          JAVASCRIPT
          ============================================= -->
     <script>
+        // =============================================
+        // CONSTANTS
+        // =============================================
+        
+        const STORAGE_KEY = 'markdown-previewer-content';
+        const STORAGE_TIMESTAMP_KEY = 'markdown-previewer-timestamp';
+
         // =============================================
         // UTILITY FUNCTIONS
         // =============================================
@@ -666,6 +854,93 @@
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
             };
+        }
+
+        // =============================================
+        // AUTO-SAVE FUNCTIONALITY
+        // =============================================
+
+        const autoSaveIndicator = document.getElementById('auto-save-indicator');
+        const autoSaveText = document.getElementById('auto-save-text');
+
+        function saveToLocalStorage(content) {
+            try {
+                localStorage.setItem(STORAGE_KEY, content);
+                localStorage.setItem(STORAGE_TIMESTAMP_KEY, Date.now().toString());
+                showSaveStatus('saved');
+            } catch (e) {
+                console.warn('Failed to save to localStorage:', e);
+                showSaveStatus('error');
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const content = localStorage.getItem(STORAGE_KEY);
+                const timestamp = localStorage.getItem(STORAGE_TIMESTAMP_KEY);
+                return { content, timestamp };
+            } catch (e) {
+                console.warn('Failed to load from localStorage:', e);
+                return { content: null, timestamp: null };
+            }
+        }
+
+        function clearLocalStorage() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(STORAGE_TIMESTAMP_KEY);
+                return true;
+            } catch (e) {
+                console.warn('Failed to clear localStorage:', e);
+                return false;
+            }
+        }
+
+        function showSaveStatus(status) {
+            autoSaveIndicator.classList.remove('saving', 'saved');
+            
+            if (status === 'saving') {
+                autoSaveIndicator.classList.add('saving');
+                autoSaveText.textContent = 'Saving...';
+            } else if (status === 'saved') {
+                autoSaveIndicator.classList.add('saved');
+                const now = new Date();
+                autoSaveText.textContent = `Saved at ${now.toLocaleTimeString()}`;
+            } else if (status === 'error') {
+                autoSaveText.textContent = 'Save failed';
+            }
+        }
+
+        const debouncedSave = debounce((content) => {
+            saveToLocalStorage(content);
+        }, 1000);
+
+        function handleAutoSave() {
+            showSaveStatus('saving');
+            debouncedSave(markdownInput.value);
+        }
+
+        // =============================================
+        // DOMPURIFY CONFIGURATION
+        // =============================================
+
+        const purifyConfig = {
+            ADD_TAGS: ['bdi', 'mjx-container', 'mjx-math', 'mjx-mrow', 'mjx-mi', 'mjx-mo', 
+                       'mjx-mn', 'mjx-mtext', 'mjx-msup', 'mjx-msub', 'mjx-mfrac', 
+                       'mjx-msqrt', 'mjx-mroot', 'mjx-mtable', 'mjx-mtr', 'mjx-mtd',
+                       'mjx-assistive-mml', 'mjx-merror', 'mjx-mpadded', 'mjx-mspace',
+                       'mjx-mstyle', 'mjx-munder', 'mjx-mover', 'mjx-munderover'],
+            ADD_ATTR: ['dir', 'display', 'jax', 'justify', 'texclass', 'data-semantic-type'],
+            ALLOW_DATA_ATTR: true,
+            USE_PROFILES: { html: true, svg: true, svgFilters: true, mathMl: true }
+        };
+
+        function sanitizeHtml(html) {
+            if (typeof DOMPurify !== 'undefined') {
+                return DOMPurify.sanitize(html, purifyConfig);
+            }
+            console.warn('DOMPurify not loaded, returning unsanitized HTML');
+            return html;
         }
 
         // =============================================
@@ -841,6 +1116,185 @@
         const directionStats = document.getElementById('direction-stats');
         const wordCountEl = document.getElementById('word-count');
         const charCountEl = document.getElementById('char-count');
+        const syncScrollToggle = document.getElementById('sync-scroll-toggle');
+        const downloadMdBtn = document.getElementById('download-md-btn');
+        const downloadHtmlBtn = document.getElementById('download-html-btn');
+        const clearStorageBtn = document.getElementById('clear-storage-btn');
+
+        // =============================================
+        // SYNC SCROLL FUNCTIONALITY
+        // =============================================
+
+        let isSyncScrollEnabled = true;
+        let isEditorScrolling = false;
+        let isPreviewScrolling = false;
+
+        syncScrollToggle.addEventListener('change', (e) => {
+            isSyncScrollEnabled = e.target.checked;
+        });
+
+        markdownInput.addEventListener('scroll', () => {
+            if (!isSyncScrollEnabled || isPreviewScrolling) return;
+            
+            isEditorScrolling = true;
+            
+            const editorScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+            const previewScrollHeight = markdownOutput.scrollHeight - markdownOutput.clientHeight;
+            
+            if (editorScrollHeight > 0 && previewScrollHeight > 0) {
+                const scrollPercentage = markdownInput.scrollTop / editorScrollHeight;
+                markdownOutput.scrollTop = scrollPercentage * previewScrollHeight;
+            }
+            
+            requestAnimationFrame(() => {
+                isEditorScrolling = false;
+            });
+        });
+
+        markdownOutput.addEventListener('scroll', () => {
+            if (!isSyncScrollEnabled || isEditorScrolling) return;
+            
+            isPreviewScrolling = true;
+            
+            const editorScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+            const previewScrollHeight = markdownOutput.scrollHeight - markdownOutput.clientHeight;
+            
+            if (editorScrollHeight > 0 && previewScrollHeight > 0) {
+                const scrollPercentage = markdownOutput.scrollTop / previewScrollHeight;
+                markdownInput.scrollTop = scrollPercentage * editorScrollHeight;
+            }
+            
+            requestAnimationFrame(() => {
+                isPreviewScrolling = false;
+            });
+        });
+
+        // =============================================
+        // EXPORT FUNCTIONALITY
+        // =============================================
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadMarkdown() {
+            const content = markdownInput.value;
+            const filename = 'document.md';
+            downloadFile(content, filename, 'text/markdown;charset=utf-8');
+        }
+
+        function downloadHtml() {
+            const previewContent = markdownOutput.innerHTML;
+            
+            // Create a complete HTML document with embedded styles
+            const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exported Markdown</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', 'Inter', sans-serif;
+            line-height: 1.8;
+            color: #334155;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        [dir="rtl"] { direction: rtl; text-align: right; }
+        [dir="ltr"] { direction: ltr; text-align: left; }
+        h1 { font-size: 1.875em; font-weight: 700; margin: 0.67em 0; color: #0f172a; }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 0.83em 0; color: #1e293b; }
+        h3 { font-size: 1.25em; font-weight: 600; margin: 1em 0; color: #334155; }
+        h4 { font-size: 1.1em; font-weight: 600; margin: 1em 0; color: #475569; }
+        p { margin-bottom: 1em; color: #475569; }
+        strong { font-weight: 600; color: #1e293b; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        ul, ol { margin-bottom: 1em; padding-left: 2em; }
+        ul { list-style-type: disc; }
+        ol { list-style-type: decimal; }
+        li { margin-bottom: 0.25em; color: #475569; }
+        code:not([class*="language-"]) {
+            background: #f1f5f9;
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875em;
+            color: #0f172a;
+        }
+        pre {
+            margin: 1em 0;
+            border-radius: 8px;
+            overflow-x: auto;
+            background: #1e293b;
+            padding: 1em;
+        }
+        pre code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875em;
+            line-height: 1.6;
+            display: block;
+            color: #e2e8f0;
+        }
+        blockquote {
+            margin: 1em 0;
+            padding: 0.5em 1em;
+            background: #f8fafc;
+            border-left: 3px solid #cbd5e1;
+            color: #64748b;
+        }
+        hr { border: none; height: 1px; background: #e2e8f0; margin: 2em 0; }
+        table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+        th, td { padding: 0.5em 1em; border: 1px solid #e2e8f0; text-align: left; }
+        th { background: #f8fafc; font-weight: 600; color: #334155; }
+        .code-block-wrapper { margin: 1em 0; border-radius: 8px; overflow: hidden; background: #1e293b; }
+        .code-block-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #0f172a; border-bottom: 1px solid #334155; }
+        .code-lang { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8; }
+        .copy-btn { display: none; }
+        .code-block-wrapper pre { margin: 0 !important; border-radius: 0 !important; }
+        .table-wrapper { overflow-x: auto; margin: 1em 0; }
+        .footnotes { margin-top: 2em; padding-top: 1em; border-top: 1px solid #e2e8f0; font-size: 0.9em; color: #64748b; }
+        mjx-container[display="true"] { display: block !important; margin: 1em auto !important; padding: 1em; background: #fffbeb; border-radius: 8px; border: 1px solid #fef3c7; text-align: center !important; }
+    </style>
+</head>
+<body>
+    ${previewContent}
+</body>
+</html>`;
+
+            downloadFile(fullHtml, 'document.html', 'text/html;charset=utf-8');
+        }
+
+        downloadMdBtn.addEventListener('click', downloadMarkdown);
+        downloadHtmlBtn.addEventListener('click', downloadHtml);
+
+        // =============================================
+        // CLEAR STORAGE FUNCTIONALITY
+        // =============================================
+
+        clearStorageBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear saved content? This will reload the sample content.')) {
+                clearLocalStorage();
+                markdownInput.value = sampleMarkdown;
+                updatePreview();
+                autoSaveText.textContent = 'Saved content cleared';
+                autoSaveIndicator.classList.remove('saving', 'saved');
+            }
+        });
 
         // =============================================
         // RTL/LTR DIRECTION DETECTION
@@ -1162,7 +1616,10 @@
 
             html = appendFootnotesSection(html, mathBlocks, inlineMaths);
 
-            markdownOutput.innerHTML = '<div class="markdown-inner">' + html + '</div>';
+            // Sanitize the HTML output before rendering
+            const sanitizedHtml = sanitizeHtml('<div class="markdown-inner">' + html + '</div>');
+
+            markdownOutput.innerHTML = sanitizedHtml;
 
             const directionCounts = applyPerBlockDirection(markdownOutput);
             updateDirectionIndicator(directionCounts.rtlCount, directionCounts.ltrCount);
@@ -1190,8 +1647,18 @@
         // =============================================
 
         const debouncedUpdate = debounce(updatePreview, 150);
-        markdownInput.addEventListener('input', debouncedUpdate);
-        markdownInput.addEventListener('paste', () => setTimeout(updatePreview, 0));
+        
+        markdownInput.addEventListener('input', () => {
+            debouncedUpdate();
+            handleAutoSave();
+        });
+        
+        markdownInput.addEventListener('paste', () => {
+            setTimeout(() => {
+                updatePreview();
+                handleAutoSave();
+            }, 0);
+        });
 
         // =============================================
         // SAMPLE CONTENT
@@ -1366,13 +1833,35 @@ The equation $E=mc^2$ is famous[^3].
 
 *Built with Marked.js, MathJax, and Prism.js* ✨`;
 
-        // Initialize with sample content
-        markdownInput.value = sampleMarkdown;
+        // =============================================
+        // INITIALIZATION
+        // =============================================
 
+        function initialize() {
+            // Try to load saved content from localStorage
+            const { content, timestamp } = loadFromLocalStorage();
+            
+            if (content && content.trim() !== '') {
+                markdownInput.value = content;
+                if (timestamp) {
+                    const savedDate = new Date(parseInt(timestamp));
+                    autoSaveText.textContent = `Last saved: ${savedDate.toLocaleString()}`;
+                    autoSaveIndicator.classList.add('saved');
+                }
+            } else {
+                // Use sample content if no saved content
+                markdownInput.value = sampleMarkdown;
+            }
+            
+            // Initial preview update
+            updatePreview();
+        }
+
+        // Initialize when DOM is ready
         if (document.readyState === 'complete') {
-            setTimeout(updatePreview, 500);
+            setTimeout(initialize, 500);
         } else {
-            window.addEventListener('load', () => setTimeout(updatePreview, 500));
+            window.addEventListener('load', () => setTimeout(initialize, 500));
         }
     </script>
 </body>
