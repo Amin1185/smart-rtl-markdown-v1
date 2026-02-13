@@ -1868,7 +1868,16 @@
                 textNodes.forEach(textNode => {
                     const text = textNode.textContent;
 
-                    const regex = /[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*(?:\s+[^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*[A-Za-z][^\s\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\(\)\[\]\{\}<>«»‹›""''\"\'「」『』【】〔〕〈〉《》⟨⟩⟪⟫⦃⦄⦗⦘⁽⁾₍₎]*)*/g;
+                    // Numbers with optional sign: -10, +50, 3.14, 2.0.1
+                    const numberToken = `[-+]?[0-9]+(?:\\.[0-9]+)*`;
+                    
+                    // Latin words, optionally starting with /: look, /look, package-name, file.txt
+                    const latinToken = `[A-Za-z][A-Za-z0-9._+-]*`;
+                    
+                    // Combined: one or more LTR tokens separated by whitespace
+                    const ltrToken = `(?:${numberToken}|${latinToken})`;
+                    const regex = new RegExp(`${ltrToken}(?:[\\s/\\\\:@]+${ltrToken})*`, 'g');
+                    
 
                     if (!regex.test(text)) return;
                     regex.lastIndex = 0;
@@ -1888,7 +1897,8 @@
                         let matchedText = match[0];
                         let trailingPunct = '';
 
-                        const trailingMatch = matchedText.match(/[.!?,;:]+$/);
+                        // Remove trailing punctuation (but not decimal points that are part of numbers)
+                        const trailingMatch = matchedText.match(/[!?,;:]+$/);
                         if (trailingMatch) {
                             trailingPunct = trailingMatch[0];
                             matchedText = matchedText.slice(0, -trailingPunct.length);
@@ -2171,6 +2181,12 @@ $$\\frac{d}{dx}[f(x) \\cdot g(x)] = f'(x)g(x) + f(x)g'(x)$$
 This line is English
 این هم فارسی
 And this is English again
+
+### تست ترکیبی عدد و حروف
+این نسخه Version 2.0 است
+مقدار -10 درجه سانتیگراد
+نگاه کردن/look به معنای دیدن است
+قیمت +50 دلار افزایش یافت
 
 ---
 
